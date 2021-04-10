@@ -1,13 +1,22 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import sys
 
 # Initialize flask server
 app = Flask(__name__, static_folder="frontend", template_folder="frontend")
 
 # Serve frontend on root directory
-@app.route("/")
+@app.route('/', methods = ['POST', 'GET'])
 def serve_frontend():
-    return render_template('index.htm')
+    if request.method == 'GET':
+        return render_template('index.htm')
+    elif request.method == 'POST':
+        origin = request.form['origin']
+        destination = request.form['destination']
+        distance = request.form['distance']
+        transport = request.form['transport']
+        elevation = request.form['elevation']
+        return origin + '<br>' + destination + '<br>' + distance + '<br>' + transport + '<br>' + elevation
+
 
 print('DONE!')
 

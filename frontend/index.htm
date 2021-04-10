@@ -1,43 +1,49 @@
 <html>
     <body>
         <h1>EleNa</h1>
-        <h2>Origin and Destination:</h2>
-        <p>From</p>
-        <div>
-            <input type="text" id="origin" name="origin" size="40" value="75 Main St, Amherst, Massachusetts" required>
-        </div>
-        <p>to</p>
-        <div>
-            <input type="text" id="destination" name="destination" size="40" value="140 Governers Dr, Amherst, Massachusetts" required>
-        </div>
-        <h2>Distance:</h2>
-        <p>Limit route to</p>
-        <div>
-            <input type="number" id="distance" name="distance" min="100" max="200" value="150">
-            <label for="distance">% of the shortest path</label>
-        </div>
-        <h2>Transportation:</h2>
-        <p>I am going to</p>
-        <div>
-            <input type="radio" id="drive" name="transport" value="drive" checked>
-            <label for="drive">Drive</label>
-        </div>
-        <div>
-            <input type="radio" id="bike" name="transport" value="bike">
-            <label for="bike">Bike</label>
-        </div>
-        <div>
-            <input type="radio" id="walk" name="transport" value="walk">
-            <label for="walk">Walk</label>
-        </div>
-        <h2>Elevation:</h2>
-        <div>
-            <input type="radio" id="maxmial" name="elevation" value="maxmial" checked>
-            <label for="maxmial">Maximal</label>
-        </div>
-        <div>
-            <input type="radio" id="minimal" name="elevation" value="minimal">
-            <label for="minimal">Minimal</label>
-        </div>
+        <form action="/" method="post">
+            <h2>Origin and Destination:</h2>
+            <p>From</p>
+            <div>
+                <input type="text" id="origin" name="origin" size="40" value="75 Main St, Amherst, Massachusetts" required>
+            </div>
+            <p>to</p>
+            <div>
+                <input type="text" id="destination" name="destination" size="40" value="140 Governers Dr, Amherst, Massachusetts" required>
+            </div>
+            <h2>Distance:</h2>
+            <p>Limit route to</p>
+            <div>
+                <input type="number" id="distance" name="distance" min="100" max="200" value="150">
+                <label for="distance">% of the shortest path</label>
+            </div>
+            <h2>Transportation:</h2>
+            <p>I am going to</p>
+            <div>
+                <input type="radio" id="drive" name="transport" value="drive" checked>
+                <label for="drive">Drive</label>
+            </div>
+            <div>
+                <input type="radio" id="bike" name="transport" value="bike">
+                <label for="bike">Bike</label>
+            </div>
+            <div>
+                <input type="radio" id="walk" name="transport" value="walk">
+                <label for="walk">Walk</label>
+            </div>
+            <h2>Elevation:</h2>
+            <div>
+                <input type="radio" id="maxmial" name="elevation" value="maxmial" checked>
+                <label for="maxmial">Maximal</label>
+            </div>
+            <div>
+                <input type="radio" id="minimal" name="elevation" value="minimal">
+                <label for="minimal">Minimal</label>
+            </div>
+            <br>
+            <div>
+                <input type="submit" id="submit" name="submit" value="Generate Route"></input>
+            </div>
+        </form>
     </body>
 </html>
