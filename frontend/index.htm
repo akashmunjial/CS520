@@ -11,57 +11,66 @@
     </head>
     <body>
         <div id="sidebar">
-            <h1>EleNa</h1>
+            <div id="title">EleNa</div>
+            <br>
             <form action="/api" method="post">
                 <section>
-                    <h2>Origin and Destination:</h2>
-                    <div>From</div>
-                    <div>
-                        <input type="text" id="origin" name="origin" size="40" value="75 Main St, Amherst, Massachusetts" required>
-                    </div>
-                    <div>to</div>
-                    <div>
-                        <input type="text" id="destination" name="destination" size="40" value="140 Governers Dr, Amherst, Massachusetts" required>
-                    </div>
+                    <fieldset>
+                        <legend>Origin</legend>
+
+                        <input type="text" id="origin" name="origin" size="30" value="75 Main St, Amherst, MA" required>
+                    </fieldset>
                 </section>
+                <br>
                 <section>
-                    <h2>Distance:</h2>
-                    <div>Limit route to</div>
-                    <div>
+                    <fieldset>
+                        <legend>Destination</legend>
+
+                        <input type="text" id="destination" name="destination" size="30" value="140 Governers Dr, Amherst, MA" required>
+                    </fieldset>
+                </section>
+                <br>
+                <section>
+                    <fieldset>
+                        <legend>Distance</legend>
+
+                        <label>Up to </label>
                         <input type="number" id="distance" name="distance" min="100" max="200" value="150">
                         <label for="distance">% of the shortest path</label>
-                    </div>
+                    </fieldset>
                 </section>
+                <br>
                 <section>
-                    <h2>Transportation:</h2>
-                    <div>I am going to</div>
-                    <div>
+                    <fieldset>
+                        <legend>Transporation</legend>
                         <input type="radio" id="drive" name="transport" value="drive" checked>
-                        <label for="drive">Drive</label>
-                    </div>
-                    <div>
+                        <label for="drive">Driving</label>
+                        <br>
+
                         <input type="radio" id="bike" name="transport" value="bike">
-                        <label for="bike">Bike</label>
-                    </div>
-                    <div>
+                        <label for="bike">Biking</label>
+                        <br>
+
                         <input type="radio" id="walk" name="transport" value="walk">
-                        <label for="walk">Walk</label>
-                    </div>
+                        <label for="walk">Walking</label>
+                    </fieldset>
                 </section>
+                <br>
                 <section>
-                    <h2>Elevation:</h2>
-                    <div>
+                    <fieldset>
+                        <legend>Elevation</legend>
+
                         <input type="radio" id="maxmial" name="elevation" value="maxmial" checked>
                         <label for="maxmial">Maximal</label>
-                    </div>
-                    <div>
+                        <br>
+
                         <input type="radio" id="minimal" name="elevation" value="minimal">
                         <label for="minimal">Minimal</label>
-                    </div>
-                    <br>
+                    </fieldset>
                 </section>
+                <br>
                 <section>
-                    <div>
+                    <div id="submit-div">
                         <input type="submit" id="submit" name="submit" value="Generate Route"></input>
                     </div>
                 </section>
