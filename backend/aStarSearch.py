@@ -1,12 +1,22 @@
-from graphNode import GraphNode
 import heapq
+import math
+import osmnx
 
 class AStar:
     def __init__(self, graph):
         self.graph = graph
         
     def heuristic(self, node1, node2):
-        return 0 #Dummy value
+        x1 = self.graph.nodes[node1]['x']
+        y1 = self.graph.nodes[node1]['y']
+        x2 = self.graph.nodes[node2]['x']
+        y2 = self.graph.nodes[node2]['y']
+        # TODO: maybe somehow incorporate z1 and z2 from elevation data???
+        return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+
+    def distance(self, node1, node2):
+        return self.graph.get_edge_data(node1, node2)[0]['length'] # TODO: what if len(array) != 1
+
 
     def search(self, start, end):
         visitedList = set()
@@ -27,21 +37,21 @@ class AStar:
                     path.insert(0,end)
                     end = parentRelation[end]
                 print('Path Found: ', path)
-            neighbors = curr[2].getNeighbors()
+            neighbors = self.graph.neighbors(curr[2])
             for n in neighbors:
                 if n in visitedList:
                     continue
                 elif n not in currentListNodes:
                     currentListNodes.add(n)
-                    heapq.heappush(currentListWithCosts, [curr[1]+self.heuristic(n,end), curr[1]+1, n])
+                    heapq.heappush(currentListWithCosts, [curr[1] + self.heuristic(n,end), curr[1] + self.distance(curr[2], n), n])
                     parentRelation[n] = curr[2]
                 else:
                     i = self.heapFind(currentListWithCosts, n)
                     if i == -1:
                         continue
-                    elif currentListWithCosts[i][0] > curr[1]+1+self.heuristic(n, end):
+                    elif currentListWithCosts[i][0] > curr[1] + self.distance(curr[2], n) + self.heuristic(n, end):
                         parentRelation[n] = curr[2]
-                        currentListWithCosts[i][0] = curr[1]+1+self.heuristic(n, end)
+                        currentListWithCosts[i][0] = curr[1] + self.distance(curr[2], n) + self.heuristic(n, end)
                         heapq.heapify(currentListWithCosts) #re-establish the heap
         print("No path found")
                     
