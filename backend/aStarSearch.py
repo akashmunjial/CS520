@@ -37,6 +37,7 @@ class AStar:
                     path.insert(0,end)
                     end = parentRelation[end]
                 print('Path Found: ', path)
+                return path
             neighbors = self.graph.neighbors(curr[2])
             for n in neighbors:
                 if n in visitedList:
@@ -54,6 +55,7 @@ class AStar:
                         currentListWithCosts[i][0] = curr[1] + self.distance(curr[2], n) + self.heuristic(n, end)
                         heapq.heapify(currentListWithCosts) #re-establish the heap
         print("No path found")
+        return []
                     
     #Find the index of a node in the heap
     def heapFind(self, heap, node):
