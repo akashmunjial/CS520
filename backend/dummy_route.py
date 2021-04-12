@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from backend.router import get_route
 import folium
 
@@ -16,4 +16,4 @@ def route():
 
     # Get recomended route
     route = get_route(origin, destination, distance, transport, elevation)
-    return route._repr_html_()
+    return jsonify(route=route)

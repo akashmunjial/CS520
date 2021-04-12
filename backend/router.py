@@ -3,17 +3,24 @@ from backend.aStarSearch import AStar
 
 # This is a temporary implementation to get a full feedback loop
 def get_route(ori, dest, dist, tran, ele):
+    
+    # translate geodata for osmnx
     point_a = osmnx.geocoder.geocode(ori)
     point_b = osmnx.geocoder.geocode(dest)
     n = max(point_a[0], point_b[0])
     s = min(point_a[0], point_b[0])
     e = max(point_a[1], point_b[1])
     w = min(point_a[1], point_b[1])
-    # Note that this method may not work near the prime meridian
+    
+    # translate data for astar
     graph = osmnx.graph.graph_from_bbox(n, s, e, w)
     start = osmnx.distance.get_nearest_node(graph, point_a)
     end = osmnx.distance.get_nearest_node(graph, point_b)
 
+    # run search algorithm
     astar = AStar(graph)
     route = astar.search(start, end)
-    return osmnx.folium.plot_route_folium(graph, route)
+
+    # convert nodes to coordinates
+    route_coords = [(graph.nodes[node]['x'], graph.nodes[node]['y']) for node in route]
+    return route_coords
