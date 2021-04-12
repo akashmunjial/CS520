@@ -16,11 +16,12 @@ def get_route(ori, dest, dist, tran, ele):
     graph = osmnx.graph.graph_from_bbox(n, s, e, w)
     start = osmnx.distance.get_nearest_node(graph, point_a)
     end = osmnx.distance.get_nearest_node(graph, point_b)
+    ### get nearest node kinda sucks ###
 
     # run search algorithm
     astar = AStar(graph)
     route = astar.search(start, end)
 
     # convert nodes to coordinates
-    route_coords = [(graph.nodes[node]['x'], graph.nodes[node]['y']) for node in route]
+    route_coords = [(graph.nodes[node]['y'], graph.nodes[node]['x']) for node in route]
     return route_coords
