@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 from backend.router import get_route
+import folium
 
 dummy_route = Blueprint('dummy_route', __name__, template_folder='templates')
 
@@ -15,5 +16,4 @@ def route():
 
     # Get recomended route
     route = get_route(origin, destination, distance, transport, elevation)
-    return route
-    #return origin + '<br>' + destination + '<br>' + distance + '<br>' + transport + '<br>' + elevation
+    return route._repr_html_()

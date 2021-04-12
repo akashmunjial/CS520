@@ -16,4 +16,4 @@ def get_route(ori, dest, dist, tran, ele):
 
     astar = AStar(graph)
     route = astar.search(start, end)
-    return '<br>'.join(str(node) for node in route)
+    return osmnx.folium.plot_route_folium(graph, route)
