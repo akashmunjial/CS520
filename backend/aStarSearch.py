@@ -1,12 +1,12 @@
 import heapq
 import math
 import osmnx
-from backend.keys import api_key 
+from backend.keys import api_key
 
 class AStar:
     def __init__(self, graph):
         self.graph = graph
-        
+
     def heuristic(self, node1, node2):
         x1 = self.graph.nodes[node1]['x']
         y1 = self.graph.nodes[node1]['y']
@@ -17,7 +17,6 @@ class AStar:
 
     def distance(self, node1, node2):
         return self.graph.get_edge_data(node1, node2)[0]['length'] # TODO: what if len(array) != 1
-
 
     def search(self, start, end):
         visitedList = set()
@@ -57,7 +56,7 @@ class AStar:
                         heapq.heapify(currentListWithCosts) #re-establish the heap
         print("No path found")
         return []
-                    
+
     #Find the index of a node in the heap
     def heapFind(self, heap, node):
         for i in range(len(heap)):
