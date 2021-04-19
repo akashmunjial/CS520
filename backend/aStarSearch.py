@@ -30,9 +30,10 @@ class AStar:
             visitedList.add(curr.getNode())
             if curr.getNode() == end:
                 path = []
-                while curr is not None:
+                while curr != start:
                     path.insert(0,curr.getNode())
                     curr = objPointers[curr.getParent()]
+                path.insert(0,curr.getNode())
                 print('Path Found: ', path)
                 return path
             neighbors = self.graph.neighbors(curr.getNode())
