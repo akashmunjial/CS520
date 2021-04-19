@@ -30,7 +30,7 @@ class AStar:
             visitedList.add(curr.getNode())
             if curr.getNode() == end:
                 path = []
-                while curr != start:
+                while curr.getParent() is not None:
                     path.insert(0,curr.getNode())
                     curr = objPointers[curr.getParent()]
                 path.insert(0,curr.getNode())
