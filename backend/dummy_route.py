@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from backend.router import get_route
+import folium
 
 dummy_route = Blueprint('dummy_route', __name__, template_folder='templates')
 
