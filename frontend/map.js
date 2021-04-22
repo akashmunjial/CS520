@@ -1,4 +1,4 @@
-// Create the map and provide mandatory OSM attribution
+// Create the map (defaulted to Amherst) and provide mandatory OSM attribution
 
 var map = L.map('map', {
   center: [42.39, -72.52],
@@ -35,17 +35,22 @@ function send_request() {
 
 function update_map(response) {
   let obj = JSON.parse(response);
-  console.log('Painting route...');
-  // Pan to the center of the origin and destination
-  map.panTo(new L.LatLng((obj.route[obj.route.length-1][0] + obj.route[0][0]) / 2, 
-                         (obj.route[obj.route.length-1][1] + obj.route[0][1]) / 2));
-  polyline_route = L.polyline(obj.route, color='#ff0000');
-  polyline_route.setStyle({color:'red'});
-  polyline_route.addTo(map);
-  console.log('Done.');
+  if(obj.route.length === 0) {
+    alert('No path found');
+    console.log('No path found');
+  } else {
+    console.log('Painting route...');
+    // Pan to the center of the origin and destination
+    map.panTo(new L.LatLng((obj.route[obj.route.length-1][0] + obj.route[0][0]) / 2, 
+                          (obj.route[obj.route.length-1][1] + obj.route[0][1]) / 2));
+    polyline_route = L.polyline(obj.route, color='#ff0000');
+    polyline_route.setStyle({color:'red'});
+    polyline_route.addTo(map);
+    console.log('Done.');
+  }
 }
 
-// Even listender to submit the route request
+// Event listener to submit the route request
 
 const submit = document.querySelector('#submit');
 
