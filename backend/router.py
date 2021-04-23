@@ -14,16 +14,11 @@ def get_route(ori, dest, dist, tran, ele):
         print('User did not select origin and/or destiation')
         return []
 
-    # get nearest nodes to origin and destination
-
     graph_provider = BoundedGraphProvider(start_coords, end_coords)
-    # graph_provider = LoadingGraphProvider()
-    start = graph_provider.find_node_near(start_coords)
-    end = graph_provider.find_node_near(end_coords)
-
+    # graph_provider = LoadingGraphProvider(start_coords, end_coords)
     astar = AStar(graph_provider)
 
-    route = astar.search(start, end)
+    route = astar.search(graph_provider.start, end = graph_provider.end)
     route_coords = [(node['y'], node['x']) for node in map(graph_provider.get_coords, route)]
     
     # convert nodes to coordinates
