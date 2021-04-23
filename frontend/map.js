@@ -33,6 +33,9 @@ function send_request() {
   request.send(new FormData(document.querySelector('#form')));
 }
 
+const submit = document.querySelector('#submit');
+const throbber = document.querySelector('#throbber');
+
 function update_map(response) {
   let obj = JSON.parse(response);
   if(obj.route.length === 0) {
@@ -48,14 +51,16 @@ function update_map(response) {
     polyline_route.addTo(map);
     console.log('Done.');
   }
+  submit.disabled = false;
+  throbber.style.visibility = 'hidden';
 }
 
 // Event listener to submit the route request
 
-const submit = document.querySelector('#submit');
-
 submit.addEventListener('click', function() {
   send_request();
+  submit.disabled = true;
+  throbber.style.visibility = 'visible';
 })
 
 // The following functions use mouse clicks to get coordinates
