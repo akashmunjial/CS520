@@ -10,7 +10,9 @@ class GraphProvider():
     loaded_chunks = defaultdict(lambda: defaultdict(lambda: False))
     graph = nx.MultiDiGraph()
 
-    def find_node_near(self, x, y):
+    def find_node_near(self, node):
+        x = node[1]
+        y = node[0]
         chunk_x = math.floor(x / CHUNK_SIZE) * CHUNK_SIZE
         chunk_y = math.floor(y / CHUNK_SIZE) * CHUNK_SIZE
         self.load_chunk(chunk_x - CHUNK_SIZE, chunk_y - CHUNK_SIZE, 3, 3)
