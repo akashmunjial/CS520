@@ -4,7 +4,7 @@ from collections import defaultdict
 from backend.keys import api_key
 import math
 
-CHUNK_SIZE = 0.005
+CHUNK_SIZE = 0.01
 
 class GraphProvider():
     loaded_chunks = defaultdict(lambda: defaultdict(lambda: False))
@@ -14,15 +14,15 @@ class GraphProvider():
         chunk_x = math.floor(x / CHUNK_SIZE) * CHUNK_SIZE
         chunk_y = math.floor(y / CHUNK_SIZE) * CHUNK_SIZE
         self.load_chunk(chunk_x - CHUNK_SIZE, chunk_y - CHUNK_SIZE, 3, 3)
-        return osmnx.distance.get_nearest_node(self.graph, (x, y), method='euclidean')
-        
+        return osmnx.distance.get_nearest_node(self.graph, (y, x), method='euclidean')
+
     def get_neighbors(self, node):
-        neighbors = self.graph.neighbors(node)
+        neighbors = list(self.graph.neighbors(node))
         for neighbor in neighbors:
             coords = self.graph.nodes[neighbor]
             cx = math.floor(coords['x'] / CHUNK_SIZE) * CHUNK_SIZE
             cy = math.floor(coords['y'] / CHUNK_SIZE) * CHUNK_SIZE
-            if not self.loaded_chunks[cx][cy]:
+            if not self.is_chunk_loaded(cx, cy):
                 self.load_chunk(cx, cy)
         return neighbors
 
@@ -34,7 +34,6 @@ class GraphProvider():
             (p1['y'] - p2['y']) ** 2 +
             (p1['z'] - p2['z']) ** 2
         )
-
     def get_edge_distance(self, n1, n2):
         return self.graph.get_edge_data(n1, n2)[0]['length']
 
@@ -58,4 +57,14 @@ class GraphProvider():
         self.graph = compose(self.graph, subgraph)
         for i in range(w):
             for j in range(h):
-                self.loaded_chunks[x1 + CHUNK_SIZE * i][y1 + CHUNK_SIZE * j] = True
+                self.set_chunk_loaded(x1 + CHUNK_SIZE * i, y1 + CHUNK_SIZE * j)
+
+    def is_chunk_loaded(self, x, y):
+        cx = math.floor(x / CHUNK_SIZE)
+        cy = math.floor(y / CHUNK_SIZE)
+        return self.loaded_chunks[cx][cy]
+
+    def set_chunk_loaded(self, x, y):
+        cx = math.floor(x / CHUNK_SIZE)
+        cy = math.floor(y / CHUNK_SIZE)
+        self.loaded_chunks[cx][cy] = True

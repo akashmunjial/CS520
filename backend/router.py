@@ -18,11 +18,9 @@ def get_route(ori, dest, dist, tran, ele):
     graph_provider = GraphProvider()
     start = graph_provider.find_node_near(point_a[1], point_a[0])
     end = graph_provider.find_node_near(point_b[1], point_b[0])
-    osmnx.plot_graph(graph_provider.graph)
 
     astar = AStar(graph_provider)
     route = astar.search(start, end)
-    osmnx.plot_graph(graph_provider.graph)
 
     # convert nodes to coordinates
     route_coords = [(node['x'], node['y']) for node in map(graph_provider.get_coords, route)]
