@@ -4,14 +4,14 @@ from backend.loading_graph_provider import LoadingGraphProvider
 from backend.bounded_graph_provider import BoundedGraphProvider
 
 # This is a temporary implementation to get a full feedback loop
-def get_route(ori, dest, dist, tran, ele):
+def get_route(ori, dest, dist, ele):
     
     # translate geodata for osmnx '(lat, lng)' -> (lat, lng)
     try:
         start_coords = tuple(float(x) for x in ori[1:-1].split(', '))
         end_coords = tuple(float(x) for x in dest[1:-1].split(', '))
     except ValueError:
-        print('User did not select origin and/or destiation')
+        print('User did not select origin and/or destination')
         return []
 
     graph_provider = BoundedGraphProvider(start_coords, end_coords)
