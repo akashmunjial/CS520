@@ -1,8 +1,9 @@
 import osmnx
 from backend.keys import api_key
 import math
+from backend.graph_provider import GraphProvider
 
-class BoundedGraphProvider():
+class BoundedGraphProvider(GraphProvider):
 
     def __init__(self, start, end):
         n = max(start[0], end[0])
