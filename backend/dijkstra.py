@@ -12,7 +12,7 @@ class Dijkstra:
         self.graph = graph
 
     def distance(self, node1, node2):
-        return self.graph.get_edge_data(node1, node2)[0]['length'] # TODO: what if len(array) != 1
+        return self.graph.get_edge_distance(node1, node2)
 
     def search(self, start, end):
         prev = {}
@@ -41,7 +41,7 @@ class Dijkstra:
                 print('Path Found: ', path)
                 return path
 
-            neighbors = self.graph.neighbors(curr_node)
+            neighbors = self.graph.get_neighbors(curr_node)
             for n in neighbors:
                 if n in visited:
                     continue
