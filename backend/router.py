@@ -1,6 +1,6 @@
 import osmnx
 from backend.aStarSearch import AStar
-from backend.graph_provider import GraphProvider
+from backend.loading_graph_provider import LoadingGraphProvider
 from backend.bounded_graph_provider import BoundedGraphProvider
 
 # This is a temporary implementation to get a full feedback loop
@@ -16,24 +16,15 @@ def get_route(ori, dest, dist, tran, ele):
 
     # get nearest nodes to origin and destination
 
-    if False: # Change to True to use lazy loading (GraphProvider)
-        graph_provider = GraphProvider()
-        start = graph_provider.find_node_near(start_coords)
-        end = graph_provider.find_node_near(end_coords)
+    graph_provider = BoundedGraphProvider(start_coords, end_coords)
+    # graph_provider = LoadingGraphProvider()
+    start = graph_provider.find_node_near(start_coords)
+    end = graph_provider.find_node_near(end_coords)
 
-        astar = AStar(graph_provider)
+    astar = AStar(graph_provider)
 
-        route = astar.search(start, end)
-        route_coords = [(node['y'], node['x']) for node in map(graph_provider.get_coords, route)]
-    else:
-        bounded_graph_provider = BoundedGraphProvider(start_coords, end_coords)
-        start = bounded_graph_provider.find_node_near(start_coords)
-        end = bounded_graph_provider.find_node_near(end_coords)
-
-        astar = AStar(bounded_graph_provider)
-
-        route = astar.search(start, end)
-        route_coords = [(node['y'], node['x']) for node in map(bounded_graph_provider.get_coords, route)]
+    route = astar.search(start, end)
+    route_coords = [(node['y'], node['x']) for node in map(graph_provider.get_coords, route)]
     
     # convert nodes to coordinates
     return route_coords

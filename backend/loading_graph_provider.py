@@ -6,7 +6,7 @@ import math
 
 CHUNK_SIZE = 0.01
 
-class GraphProvider():
+class LoadingGraphProvider():
     loaded_chunks = defaultdict(lambda: defaultdict(lambda: False))
     graph = nx.MultiDiGraph()
 
