@@ -1,6 +1,7 @@
 import osmnx
 import networkx as nx
 from collections import defaultdict
+from backend.keys import api_key
 import math
 
 CHUNK_SIZE = 0.005
@@ -52,6 +53,7 @@ class GraphProvider():
         y2 = y1 + CHUNK_SIZE * h
         compose = nx.algorithms.operators.binary.compose
         subgraph = osmnx.graph.graph_from_bbox(x2, x1, y2, y1, simplify=False, truncate_by_edge=True)
+        osmnx.elevation.add_node_elevations(subgraph, api_key)
         self.graph = compose(self.graph, subgraph)
         for i in range(w):
             for j in range(h):
