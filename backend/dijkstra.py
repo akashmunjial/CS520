@@ -15,7 +15,7 @@ class Dijkstra:
         self.use_elevation = use_elevation
 
     def distance(self, node1, node2):
-        return self.graph.get_edge_data(node1, node2)[0]['length'] # TODO: what if len(array) != 1
+        return self.graph.get_edge_distance(node1, node2)
 
     def elevation(self, node):
         return self.graph.nodes[node]['elevation']
@@ -50,7 +50,7 @@ class Dijkstra:
                 path_len = dist[end] - subtract_total
                 return path, path_len
 
-            neighbors = self.graph.neighbors(curr_node)
+            neighbors = self.graph.get_neighbors(curr_node)
             for n in neighbors:
                 if n in visited:
                     continue

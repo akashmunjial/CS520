@@ -9,15 +9,13 @@ class AStar:
         self.graph = graph
         
     def heuristic(self, node1, node2):
-        x1 = self.graph.nodes[node1]['x']
-        y1 = self.graph.nodes[node1]['y']
-        x2 = self.graph.nodes[node2]['x']
-        y2 = self.graph.nodes[node2]['y']
+        n1 = self.graph.get_coords(node1)
+        n2 = self.graph.get_coords(node2)
         # TODO: maybe somehow incorporate z1 and z2 from elevation data???
-        return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+        return math.sqrt((n1['x'] - n2['x']) ** 2 + (n1['y'] - n2['y']) ** 2)
 
     def distance(self, node1, node2):
-        return self.graph.get_edge_data(node1, node2)[0]['length'] # TODO: what if len(array) != 1
+        return self.graph.get_edge_distance(node1, node2) # TODO: what if len(array) != 1
 
 
     def search(self, start, end):
@@ -36,7 +34,7 @@ class AStar:
                 path.insert(0,curr.getNode())
                 print('Path Found: ', path)
                 return path
-            neighbors = self.graph.neighbors(curr.getNode())
+            neighbors = self.graph.get_neighbors(curr.getNode())
             for n in neighbors:
                 if n in visitedList:
                     continue
