@@ -71,3 +71,4 @@ class LoadingGraphProvider(GraphProvider):
         cx = math.floor(x / CHUNK_SIZE)
         cy = math.floor(y / CHUNK_SIZE)
         self.loaded_chunks[cx][cy] = True
+

@@ -11,6 +11,8 @@ class BoundedGraphProvider(GraphProvider):
         e = max(start[1], end[1])
         w = min(start[1], end[1])
         self.graph = osmnx.graph.graph_from_bbox(n + abs(e - w), s - abs(e - w), e + abs(n - s), w - abs(e - w), simplify=False)
+        #osmnx.plot.plot_graph(self.graph)
+        #import pdb; pdb.set_trace()
         osmnx.elevation.add_node_elevations(self.graph, api_key=api_key)
 
     def find_node_near(self, node):
