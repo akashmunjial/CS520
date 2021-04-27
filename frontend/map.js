@@ -10,22 +10,57 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   minZoom: '0'
 }).addTo(map);
 
-// The send_request and update_map functions manage the communication to the backend
+// functions to pan the map to a specified location
+
+function send_search_request() {
+  console.log('Sending search request...');
+  let request = new XMLHttpRequest();
+  // Set the callback function once the coords are returned
+  request.onreadystatechange = function() {
+    if(request.readyState === 4) {
+      console.log('Coords recieved.');
+      update_map_search(request.response);
+    }
+  }
+  // Open and send the request
+  request.open('POST', '/search');
+  request.send(new FormData(document.querySelector('#search-form')));
+}
+
+const search_submit = document.querySelector('#search-submit');
+
+function update_map_search(response) {
+  let obj = JSON.parse(response);
+  if(obj.coords.length === 0) {
+    alert('Place not found');
+  } else {
+    // Pan to the requested place
+    map.panTo(new L.LatLng(obj.coords[0], obj.coords[1]));
+  }
+}
+
+// Event listener to submit the route request
+
+search_submit.addEventListener('click', function() {
+  send_search_request();
+})
+
+// The send_route_request and update_map_route functions manage the communication to the backend
 // The names are self-explanatory
 // It also instantiates dummy polyline so it can be replaced later
 
 var polyline_route = L.polyline([0,0][0,0]);
 
-function send_request() {
+function send_route_request() {
   console.log('Sending route request...');
-  // Immediately erase existing route - add throbber?
+  // Immediately erase existing route
   polyline_route.remove();
   let request = new XMLHttpRequest();
   // Set the callback function once the route is loaded
   request.onreadystatechange = function() {
     if(request.readyState === 4) {
       console.log('Route recieved.');
-      update_map(request.response);
+      update_map_route(request.response);
     }
   }
   // Open and send the request
@@ -36,7 +71,7 @@ function send_request() {
 const submit = document.querySelector('#submit');
 const throbber = document.querySelector('#throbber');
 
-function update_map(response) {
+function update_map_route(response) {
   let obj = JSON.parse(response);
   if(obj.route.length === 0) {
     alert('No path found');
@@ -58,7 +93,7 @@ function update_map(response) {
 // Event listener to submit the route request
 
 submit.addEventListener('click', function() {
-  send_request();
+  send_route_request();
   submit.disabled = true;
   throbber.style.visibility = 'visible';
 })

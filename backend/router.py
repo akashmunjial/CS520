@@ -14,8 +14,8 @@ def get_route(ori, dest, dist, ele):
         print('User did not select origin and/or destination')
         return []
 
-    graph_provider = BoundedGraphProvider(start_coords, end_coords)
-    # graph_provider = LoadingGraphProvider(start_coords, end_coords)
+    # graph_provider = BoundedGraphProvider(start_coords, end_coords)
+    graph_provider = LoadingGraphProvider(start_coords, end_coords)
     astar = AStar(graph_provider)
 
     route = astar.search(graph_provider.start, end = graph_provider.end)

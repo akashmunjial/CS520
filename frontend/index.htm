@@ -13,6 +13,22 @@
         <div id="sidebar">
             <div id="title">EleNa</div>
             <br>
+            <form id="search-form" onsubmit="return false">
+                <section>
+                    <fieldset>
+                        <legend>Search</legend>
+
+                        <input type="text" id="place" name="place" size="25" value="Amherst, MA" required>
+                    </fieldset>
+                </section>
+                <br>
+                <section>
+                    <div id="submit-div">
+                        <input type="submit" id="search-submit" name="search-submit" value="Search for Place"></input>
+                    </div>
+                </section>
+            </form>
+            <br>
             <form id="form" onsubmit="return false">
                 <section>
                     <fieldset>
@@ -35,7 +51,7 @@
                         <legend>Distance</legend>
 
                         <label>Up to </label>
-                        <input type="number" id="distance" name="distance" min="100" max="200" value="150">
+                        <input type="number" id="distance" name="distance" min="100" max="300" value="200">
                         <label for="distance">% of the shortest path</label>
                     </fieldset>
                 </section>
