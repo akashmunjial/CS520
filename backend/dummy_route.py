@@ -12,9 +12,10 @@ def route():
     destination = request.form['destination']
     distance = request.form['distance']
     elevation = request.form['elevation']
+    graph = request.form['graph']
 
     # Get recomended route
-    route = get_route(origin, destination, distance, elevation)
+    route = get_route(origin, destination, distance, elevation, graph)
     return jsonify(route=route)
 
 @dummy_route.route('/search', methods = ['POST'])

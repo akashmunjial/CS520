@@ -5,7 +5,7 @@ from backend.loading_graph_provider import LoadingGraphProvider
 from backend.bounded_graph_provider import BoundedGraphProvider
 
 # This is a temporary implementation to get a full feedback loop
-def get_route(ori, dest, dist, ele):
+def get_route(ori, dest, dist, ele, grph):
     
     # translate geodata for osmnx '(lat, lng)' -> (lat, lng)
     try:
@@ -15,8 +15,12 @@ def get_route(ori, dest, dist, ele):
         print('User did not select origin and/or destination')
         return []
 
-    # graph_provider = BoundedGraphProvider(start_coords, end_coords)
-    graph_provider = LoadingGraphProvider(start_coords, end_coords)
+
+    # Choose graph type
+    if(grph == 'bounded'):
+        graph_provider = BoundedGraphProvider(start_coords, end_coords)
+    else:
+        graph_provider = LoadingGraphProvider(start_coords, end_coords)
     
     # Choose between Dijkstra and AStar based on form input
     if(ele == 'shortest'):
