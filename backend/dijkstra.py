@@ -1,9 +1,9 @@
-import heapq
 import math
 from collections import defaultdict
 import scipy #XXX
 import osmnx #XXX
 import numpy as np
+from heapdict import heapdict
 
 '''
 Essentially follows the implementation here: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm#Using_a_priority_queue
@@ -18,7 +18,7 @@ class Dijkstra:
     def elevation(self, node):
         return self.graph_provider.get_coords(node)['z']
 
-    def search(self, start, end, use_elevation=False, max_path_len=math.inf, opt_goal='maximal', alpha=0.9):
+    def search(self, start, end, use_elevation=False, max_path_len=math.inf, opt_goal='maximal', alpha=0.9, visualize=False):
         assert alpha >= 0. and alpha <= 1.
         if use_elevation:
             assert max_path_len != math.inf, "If we want to use elevation data, we need a finite maximum path length we cannot exceed"
@@ -29,8 +29,7 @@ class Dijkstra:
         weight = defaultdict(lambda: math.inf) # The weight of the current minimum-weight path to a node
         elev_diff = {}
         visited = set()
-        priority_queue = []
-        #subtract = {}
+        priority_queue = heapdict()
 
         ele_start = self.elevation(start)
         ele_end = self.elevation(end)
@@ -42,9 +41,9 @@ class Dijkstra:
         dist[start] = 0.
         weight[start] = 0.
         elev_diff[start] = 0.
-        heapq.heappush(priority_queue, (weight[start], start))
+        priority_queue[start] = weight[start]
         while len(priority_queue) > 0:
-            curr_weight, curr_node = heapq.heappop(priority_queue)
+            curr_node, curr_weight = priority_queue.popitem()
 
             '''Mark as visited, which implies dist[curr_node] currently
             contains shortest distance between 'start' and 'curr_node'
@@ -53,8 +52,11 @@ class Dijkstra:
             if curr_node == end:
                 print(sorted([dist[n] for n in visited]))
                 print(f"And finally, dist to end is {dist[end]}")
-                #osmnx.plot.plot_graph(self.graph_provider.graph)
-                #osmnx.plot.plot_graph(self.graph_provider.graph.subgraph(list(visited)))
+                if visualize:
+                    if use_elevation:
+                        osmnx.plot.plot_graph(self.graph_provider.graph.subgraph(list(visited)))
+                    else:
+                        osmnx.plot.plot_graph(self.graph_provider.graph)
                 print(f"Highest ele seen: {max_ele}")
                 path = [end]
                 predecessor = prev[end]
@@ -69,15 +71,22 @@ class Dijkstra:
                 return path, path_len
 
             neighbors = list(self.graph_provider.get_neighbors(curr_node))
-            if use_elevation:
+            #if use_elevation:
+            if False:
                 softmax_list = []
                 for n in neighbors:
                     if n is visited:
                         continue
-                    softmax_list.append(-self.elevation(n))
-                softmax = np.array(softmax_list) ** 3
-                softmax = softmax / np.sum(softmax)
-                print(f"Dist: {softmax}")
+                    ele_n = self.elevation(n)
+                    curr_elev_diff = ele_n - self.elevation(curr_node)
+                    hinge_diff = max([0., curr_elev_diff])
+                    if opt_goal == 'minimal':
+                        softmax_list.append(hinge_diff)
+                    else:
+                        softmax_list.append(-hinge_diff)
+                #softmax = 2 ** np.array(softmax_list)
+                softmax = 3 ** np.array(softmax_list)
+                #softmax = softmax / np.sum(softmax)
 
             for i, n in enumerate(neighbors):
                 if n in visited:
@@ -91,27 +100,27 @@ class Dijkstra:
                     #print(f"Elev_diff: {elev_diff}")
                     if opt_goal == 'minimal':
                         heuristic_weight = max([0., curr_elev_diff])
-                        if heuristic_weight > 0.:
-                            pass
-                            #heuristic_weight += 1.
-                            #heuristic_weight
-                        #print(f"Heuristic weight is {heuristic_weight}")
-                        alt_path_weight = curr_weight + self.distance(curr_node, n) + heuristic_weight
+                        #heuristic_weight = softmax[i] * max_path_len
+                        #heuristic_weight = softmax[i]
+                        #alt_path_weight = curr_weight + self.distance(curr_node, n) + heuristic_weight
+                        alt_path_weight = curr_weight + heuristic_weight
                     else:
-                        heuristic_weight = max([0., curr_elev_diff])
-                        #heuristic_weight = math.exp(-heuristic_weight)
-                        heuristic_weight = 5. ** (-heuristic_weight)
-                        #alt_path_weight = curr_weight + softmax[i] * self.distance(curr_node, n)
+                        if ele_n < ele_end and curr_elev_diff < 0: # We will have to come back up from this, so let's do it!
+                            heuristic_weight = curr_elev_diff
+                        else:
+                            heuristic_weight = -max([0., curr_elev_diff])
                         alt_path_weight = curr_weight + heuristic_weight
                 else:
                     alt_path_weight = alt_path_dist
 
-                if alt_path_weight < weight[n] and alt_path_dist < max_path_len:
-                    elev_diff[n] = curr_elev_diff
-                    dist[n] = alt_path_dist
-                    weight[n] = alt_path_weight
-                    prev[n] = curr_node
-                    heapq.heappush(priority_queue, (weight[n], n))
+                if alt_path_dist <= max_path_len:
+                    if ((opt_goal == 'maximal' and alt_path_weight <= weight[n]) or
+                            alt_path_weight < weight[n]):
+                        elev_diff[n] = curr_elev_diff
+                        dist[n] = alt_path_dist
+                        weight[n] = alt_path_weight
+                        prev[n] = curr_node
+                        priority_queue[n] = weight[n]
 
         """
         Should we only allow a node to appear once in the priority queue? That would
@@ -120,5 +129,11 @@ class Dijkstra:
         """
 
         print("No path found")
+        if visualize:
+            if use_elevation:
+                osmnx.plot.plot_graph(self.graph_provider.graph.subgraph(list(visited)))
+            else:
+                osmnx.plot.plot_graph(self.graph_provider.graph)
+
         return [], math.inf
 
