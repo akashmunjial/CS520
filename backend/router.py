@@ -25,11 +25,15 @@ def get_route(ori, dest, dist, ele, grph):
         graph_provider = LoadingGraphProvider(start_coords, end_coords)
     
     # Choose between Dijkstra and AStar based on form input
-    if(ele == 'shortest'):
-        search_algo = Dijkstra(graph_provider)
-    else:
-        search_algo = AStar(graph_provider, ele, int(dist) * 1000000)
-    route = search_algo.search(graph_provider.start, graph_provider.end)
+    # if(ele == 'shortest'):
+    #     search_algo = Dijkstra(graph_provider)
+    # else:
+    #     search_algo = AStar(graph_provider, ele, int(dist) * 1000000)
+    # route = search_algo.search(graph_provider.start, graph_provider.end)
+    shortest = Dijkstra(graph_provider)
+    path, length = shortest.search(graph_provider.start, graph_provider.end)
+    search = AStar(graph_provider, ele, int(dist)*length/100)
+    route = search.search(graph_provider.start, graph_provider.end)
     stats = [1000, 100, 1500, 500]
     
     # convert nodes to coordinates and return
