@@ -3,6 +3,7 @@ from backend.aStarSearch import AStar
 from backend.dijkstra import Dijkstra
 from backend.loading_graph_provider import LoadingGraphProvider
 from backend.bounded_graph_provider import BoundedGraphProvider
+from backend.dijkstra import Dijkstra
 
 # This is a temporary implementation to get a full feedback loop
 def get_route(ori, dest, dist, ele, grph):
@@ -14,6 +15,7 @@ def get_route(ori, dest, dist, ele, grph):
     except ValueError:
         print('User did not select origin and/or destination')
         return []
+
 
 
     # Choose graph type
