@@ -37,6 +37,7 @@ def get_route(ori, dest, dist, tran, ele):
         astar = AStar(bounded_graph_provider, ele, dist*length/100)
         route = astar.search(start, end)
         route_coords = [(node['y'], node['x']) for node in map(bounded_graph_provider.get_coords, route)]
+        print(length)
     
     # convert nodes to coordinates
     return route_coords
