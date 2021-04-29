@@ -1,9 +1,8 @@
 import osmnx
-from backend.aStarSearch import AStar
-from backend.dijkstra import Dijkstra
-from backend.loading_graph_provider import LoadingGraphProvider
-from backend.bounded_graph_provider import BoundedGraphProvider
-from backend.dijkstra import Dijkstra
+from backend.search_algs.a_star import AStar
+from backend.search_algs.dijkstra import Dijkstra
+from backend.graph_providers.loading_graph_provider import LoadingGraphProvider
+from backend.graph_providers.bounded_graph_provider import BoundedGraphProvider
 
 # This is a temporary implementation to get a full feedback loop
 def get_route(ori, dest, dist, ele, grph):
@@ -16,8 +15,6 @@ def get_route(ori, dest, dist, ele, grph):
         print('User did not select origin and/or destination')
         return []
 
-
-
     # Choose graph type
     if(grph == 'bounded'):
         graph_provider = BoundedGraphProvider(start_coords, end_coords)
@@ -28,7 +25,7 @@ def get_route(ori, dest, dist, ele, grph):
     if(ele == 'shortest'):
         search_algo = Dijkstra(graph_provider)
     else:
-        search_algo = AStar(graph_provider)
+        search_algo = AStar(graph_provider, False, 99999)
     route = search_algo.search(graph_provider.start, graph_provider.end)
     
     # convert nodes to coordinates and return

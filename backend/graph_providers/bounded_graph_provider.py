@@ -1,7 +1,7 @@
 import osmnx
 from backend.keys import api_key
 import math
-from backend.graph_provider import GraphProvider
+from backend.graph_providers.graph_provider import GraphProvider
 
 class BoundedGraphProvider(GraphProvider):
 
