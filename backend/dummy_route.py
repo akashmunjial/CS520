@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+import osmnx
 from backend.router import get_route
 
 dummy_route = Blueprint('dummy_route', __name__, template_folder='templates')
@@ -9,10 +10,25 @@ def route():
     # Get request data
     origin = request.form['origin']
     destination = request.form['destination']
-    distance = int(request.form['distance'])
-    transport = request.form['transport']
+    distance = request.form['distance']
     elevation = request.form['elevation']
+    graph = request.form['graph']
 
     # Get recomended route
-    route = get_route(origin, destination, distance, transport, elevation)
+    route = get_route(origin, destination, distance, elevation, graph)
     return jsonify(route=route)
+
+@dummy_route.route('/search', methods = ['POST'])
+def search():
+    
+    # Get request data
+    place = request.form['place']
+
+    # Geocode place to coordinates
+    try:
+        coords = osmnx.geocoder.geocode(place)
+    except Exception:
+        coords = []
+
+    # Return coordinates
+    return jsonify(coords=coords)
