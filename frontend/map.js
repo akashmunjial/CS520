@@ -70,6 +70,7 @@ function send_route_request() {
 
 const submit = document.querySelector('#submit');
 const throbber = document.querySelector('#throbber');
+const stats = document.querySelector('#stats');
 
 function update_map_route(response) {
   let obj = JSON.parse(response);
@@ -85,6 +86,13 @@ function update_map_route(response) {
     polyline_route.setStyle({color:'red'});
     polyline_route.addTo(map);
     console.log('Done.');
+    // Print stats
+    pretty_stats =    '        Shortest path length: ' + obj.stats[0] + 'm\r\n'
+                    + 'Shortest path elevation gain: ' + obj.stats[1] + 'm\r\n'
+                    + '             New path length: ' + obj.stats[2] + 'm\r\n'
+                    + '     New path elevation gain: ' + obj.stats[3] + 'm';
+    stats.textContent = pretty_stats;
+    stats.style.visibility = 'visible';
   }
   submit.disabled = false;
   throbber.style.visibility = 'hidden';
@@ -95,6 +103,7 @@ function update_map_route(response) {
 submit.addEventListener('click', function() {
   send_route_request();
   submit.disabled = true;
+  stats.style.visibility = 'hidden';
   throbber.style.visibility = 'visible';
 })
 

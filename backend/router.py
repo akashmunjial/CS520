@@ -28,9 +28,10 @@ def get_route(ori, dest, dist, ele, grph):
     if(ele == 'shortest'):
         search_algo = Dijkstra(graph_provider)
     else:
-        search_algo = AStar(graph_provider)
+        search_algo = AStar(graph_provider, ele, int(dist) * 1000000)
     route = search_algo.search(graph_provider.start, graph_provider.end)
+    stats = [1000, 100, 1500, 500]
     
     # convert nodes to coordinates and return
     route_coords = [(node['y'], node['x']) for node in map(graph_provider.get_coords, route)]
-    return route_coords
+    return route_coords, stats
