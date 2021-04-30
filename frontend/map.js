@@ -87,10 +87,15 @@ function update_map_route(response) {
     polyline_route.addTo(map);
     console.log('Done.');
     // Print stats
-    pretty_stats =    '        Shortest path length: ' + obj.stats[0] + 'm\r\n'
-                    + 'Shortest path elevation gain: ' + obj.stats[1] + 'm\r\n'
-                    + '             New path length: ' + obj.stats[2] + 'm\r\n'
-                    + '     New path elevation gain: ' + obj.stats[3] + 'm';
+    if(obj.stats[0]===obj.stats[2] && obj.stats[1]===obj.stats[3]) {
+      pretty_stats =    '        Shortest path length: ' + obj.stats[0] + 'm\r\n'
+                      + 'Shortest path elevation gain: ' + obj.stats[1] + 'm';
+    } else {
+      pretty_stats =    '        Shortest path length: ' + obj.stats[0] + 'm\r\n'
+                      + 'Shortest path elevation gain: ' + obj.stats[1] + 'm\r\n'
+                      + '             New path length: ' + obj.stats[2] + 'm\r\n'
+                      + '     New path elevation gain: ' + obj.stats[3] + 'm';
+    }
     stats.textContent = pretty_stats;
     stats.style.visibility = 'visible';
   }
