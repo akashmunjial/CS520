@@ -87,7 +87,7 @@ function update_map_route(response) {
     polyline_route.addTo(map);
     console.log('Done.');
     // Print stats
-    if(obj.stats[0]===obj.stats[2] && obj.stats[1]===obj.stats[3]) {
+    if(obj.stats[2]==-1 && obj.stats[3]==-1) {
       pretty_stats =    '        Shortest path length: ' + obj.stats[0] + 'm\r\n'
                       + 'Shortest path elevation gain: ' + obj.stats[1] + 'm';
     } else {

@@ -34,7 +34,7 @@ def get_route(ori, dest, dist, ele, grph):
         maximal = MidpointMiracle(graph_provider)
         res = maximal.search(graph_provider.start, graph_provider.end, max_path_len = limit)
     else:
-        res = shortest_res
+        res = {'path': shortest_res['path'], 'path_len': -1, 'ele_gain': -1}
 
     stats = [round(float(shortest_res['path_len'])), round(float(shortest_res['ele_gain'])), round(float(res['path_len'])), round(float(res['ele_gain']))]
     route = res['path']
