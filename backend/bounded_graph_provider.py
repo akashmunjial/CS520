@@ -18,6 +18,9 @@ class BoundedGraphProvider(GraphProvider):
     def find_node_near(self, node):
         return osmnx.distance.get_nearest_node(self.graph, node, method='euclidean')
 
+    def get_all_nodes(self):
+        return self.graph.nodes
+
     def get_neighbors(self, node):
         return self.graph.neighbors(node)
 
