@@ -1,173 +1,129 @@
-import math
-import time
-from collections import defaultdict
-import scipy #XXX
-import osmnx #XXX
-import numpy as np
-from heapdict import heapdict
+from math import inf
+
 from backend.dijkstra import Dijkstra
 
-class MaxSearch:
+
+SS_NOT_COMPUTED_MSG = "We have not computed the single source data yet."
+
+class MidpointMiracle:
+
     def __init__(self, graph_provider):
         self.graph_provider = graph_provider
+        self._single_source_data = None
 
-    def distance(self, node1, node2):
-        return self.graph_provider.get_edge_distance(node1, node2)
-
-    def crow_flies(self, node1, node2):
-        coords1 = self.graph_provider.get_coords(node1)
-        x1, y1 = coords1['x'], coords1['y']
-        coords2 = self.graph_provider.get_coords(node2)
-        x2, y2 = coords2['x'], coords2['y']
-        dist = osmnx.distance.great_circle_vec(y1,x1,y2,x2)
-        return dist
-
-    def elevation(self, node):
+    def __elevation(self, node):
         return self.graph_provider.get_coords(node)['z']
 
-    def search(self, start, end, max_path_len=math.inf, visualize=False, backward=False):
-        result = {
-                'path': [],
-                'path_len': math.inf,
-                'ele_gain': -math.inf, # Assuming opt goal is minimize, this makes sense as default so that we never take an empty path as best_result
-                }
+    def __compute_single_source_data(self, start, end):
+        single_source_data = {}
+        dijkstra = Dijkstra(self.graph_provider)
+        single_source_data['start'] = dijkstra.single_source(start)
+        single_source_data['end'] = dijkstra.single_source(end)
 
-        # Single-source shortest paths to all nodes
-        start_time = time.time()
-        ss_dijkstra = Dijkstra(self.graph_provider)
-        ss_result_start = ss_dijkstra.single_source(start)
-        ss_result_end = ss_dijkstra.single_source(end)
-        end_time = time.time()
-        print(f"Single source took (seconds): {end_time - start_time}\n")
+        self._single_source_data = single_source_data
 
-        all_nodes = self.graph_provider.graph.nodes
-
-        ele_start = self.elevation(start)
-        ele_end = self.elevation(end)
+    def __filter_func_factory(self, start, end, max_path_len):
+        assert self._single_source_data is not None, SS_NOT_COMPUTED_MSG
+        ele_start = self.__elevation(start)
+        ele_end = self.__elevation(end)
 
         min_of_start_and_end = min([ele_start, ele_end])
-        max_of_start_and_end = max([ele_start, ele_end])
-        ss_start_dist = ss_result_start['dist']
-        ss_end_dist = ss_result_end['dist']
         def dips_below_min(node):
-            return self.elevation(node) < min_of_start_and_end
+            return self.__elevation(node) < min_of_start_and_end
 
-        def is_acceptable(node):
-            ele_end = self.elevation(end)
+        dists_from_start = self._single_source_data['start']['dist']
+        dists_to_end = self._single_source_data['end']['dist']
+        def filter_func(node):
             if node == start or node == end:
                 return False
 
-            acceptable_range = max_path_len
-            dist_to_start = ss_start_dist[node]
-            dist_to_end = ss_end_dist[node]
-
-            # Check that there is at least a hope of path being
-            # less or equal max_path_len
+            dist_to_start = dists_from_start[node]
+            dist_to_end = dists_to_end[node]
             if dist_to_start + dist_to_end > max_path_len:
                 return False
 
             # Check that there is at least a hope of elevation gain here
-            if not dips_below_min(node) and self.elevation(node) < ele_start:
+            if not dips_below_min(node) and self.__elevation(node) < ele_start:
                 return False
 
             return True
 
-        acceptable_nodes = [node for node in all_nodes if is_acceptable(node)]
-        #print(f"\nThere were {len(acceptable_nodes)} acceptable nodes\n")
+        return filter_func
+
+    def __sort_func_factory(self, start, end):
+        ele_start = self.__elevation(start)
+        ele_end = self.__elevation(end)
 
         def sort_func(node):
-            node_elev = self.elevation(node)
-            if node_elev < ele_start:
+            node_ele = self.__elevation(node)
+            if node_ele < ele_start:
                 # We will gain at least this much while traveling
                 # from node to end
-                value = max([0., ele_end - node_elev])
+                value = max([0., ele_end - node_ele])
             else:
                 # We will gain at least this much by traveling from
                 # start to node
-                value = node_elev - ele_start
+                value = node_ele - ele_start
             return value
 
-        sorted_nodes = sorted(
-                acceptable_nodes, key=sort_func, reverse=True)
-        #sorted_nodes = sorted(
-        #        acceptable_nodes, key=lambda x: self.elevation(x), reverse=True)
+        return sort_func
 
-        # Keep just a few of the potential midpoints, and each time we select
-        # a midpoint, prune away it's neighbors so we get more diverse points
-        keep_n = 10
-        prune_depth = 3
-        keep = []
-        while(len(sorted_nodes) > 0 and len(keep) < keep_n):
-            curr = sorted_nodes.pop(0)
-            keep.append(curr)
-            neighbors = set(self.graph_provider.get_neighbors(curr))
-            old_neighbors = neighbors
-            for _ in range(prune_depth - 1):
-                new_neighbors = [n for node in old_neighbors for n in self.graph_provider.get_neighbors(node)] 
-                new_neighbors = set(new_neighbors)
-                neighbors = neighbors.union(new_neighbors)
-                old_neighbors = new_neighbors
-            # Expensive: probably an easier way to do this
-            sorted_nodes = [node for node in sorted_nodes if node not in neighbors]
+    def __merge_results(self, res_to_node, res_to_end):
+        path_to_node = res_to_node['path']
+        path_to_end = res_to_end['path']
 
-        #print(f"\nThere were {len(keep)} kept\n")
+        # Contains distances from start to midpoint
+        dist_prefix = res_to_node['dist']
+        # Contains distances from end to midpoint
+        dist_suffix = res_to_end['dist']
 
-        def merge_results(res_to_node, res_to_end):
-            path_to_node = res_to_node['path']
-            path_to_end = res_to_end['path']
+        to_node_contributions = res_to_node['contributions']
+        to_end_contributions = res_to_end['contributions']
 
-            # Contains distances from start to midpoint
-            dist_prefix = res_to_node['dist']
-            # Contains distances from end to midpoint
-            dist_suffix = res_to_end['dist']
+        midpoint = path_to_node[-1]
+        assert midpoint == path_to_end[0]
 
-            to_node_contributions = res_to_node['contributions']
-            to_end_contributions = res_to_end['contributions']
+        # Remove any shared nodes from the concatenated path
+        shared_node = None
+        i = 0
+        sub_from_gain = 0.
+        while(i < len(path_to_end) and len(path_to_node) > 0 and path_to_node[-1] == path_to_end[i]):
+            shared_node = path_to_node[-1]
+            path_to_node.pop(-1)
+            sub_from_gain += to_node_contributions[shared_node]
+            sub_from_gain += to_end_contributions[shared_node]
+            i += 1
+        assert len(set(path_to_node).intersection(set(path_to_end))) == 0
+        # Replace the final shared node (midpoint if the paths share no other nodes)
+        path_to_node.append(shared_node)
+        sub_from_gain -= to_node_contributions[shared_node]
 
-            midpoint = path_to_node[-1]
-            assert midpoint == path_to_end[0]
+        merged = {}
+        # Handle path differently
+        merged['path'] = path_to_node + path_to_end[i:]
+        merged['path_len'] = dist_prefix[shared_node] + dist_suffix[shared_node]
+        merged['ele_gain'] = res_to_node['ele_gain'] + res_to_end['ele_gain'] - sub_from_gain
 
-            # Remove any shared nodes from the concatenated path
-            shared_node = None
-            i = 0
-            sub_from_gain = 0.
-            while(i < len(path_to_end) and len(path_to_node) > 0 and path_to_node[-1] == path_to_end[i]):
-                shared_node = path_to_node[-1]
-                path_to_node.pop(-1)
-                sub_from_gain += to_node_contributions[shared_node]
-                sub_from_gain += to_end_contributions[shared_node]
-                i += 1
-            assert len(set(path_to_node).intersection(set(path_to_end))) == 0
-            # Replace the final shared node (midpoint if the paths share no other nodes)
-            path_to_node.append(shared_node)
-            sub_from_gain -= to_node_contributions[shared_node]
+        return merged
 
-            merged = {}
-            # Handle path differently
-            merged['path'] = path_to_node + path_to_end[i:]
-            merged['path_len'] = dist_prefix[shared_node] + dist_suffix[shared_node]
-            merged['ele_gain'] = res_to_node['ele_gain'] + res_to_end['ele_gain'] - sub_from_gain
-
-            return merged
-
-        def reconstruct_result(end, ss_result, backward=False):
+    def __reconstruct_result(self, end, ss_result, backward=False):
             prev = ss_result['prev']
-            elev_diff = ss_result['elev_diff']
+            ele_diff = ss_result['ele_diff']
             dist = ss_result['dist']
 
             path = [end]
-            end_contribution = 0. if backward else max([0., elev_diff[end]])
-            cum_elev_diff = end_contribution
+            end_contribution = 0. if backward else max([0., ele_diff[end]])
+            cum_ele_diff = end_contribution
             predecessor = prev[end]
             contributions = {} # To cumulative elevation gain
             contributions[end] = end_contribution
             while predecessor is not None:
                 path.append(predecessor)
                 if backward:
-                    contribution = max([0., -elev_diff[predecessor]])
+                    contribution = max([0., -ele_diff[predecessor]])
                 else:
-                    contribution = max([0., elev_diff[predecessor]])
-                cum_elev_diff += contribution
+                    contribution = max([0., ele_diff[predecessor]])
+                cum_ele_diff += contribution
                 contributions[predecessor] = contribution
                 predecessor = prev[predecessor]
 
@@ -178,26 +134,58 @@ class MaxSearch:
             result = {
                     'path': path,
                     'path_len': path_len,
-                    'ele_gain': cum_elev_diff,
+                    'ele_gain': cum_ele_diff,
                     'contributions': contributions,
                     'dist': dist
                     }
 
             return result
 
+    def __select_and_prune(self, sorted_candidates, keep_n, prune_depth):
+        # Keep just a few of the potential midpoints, and each time we select
+        # a midpoint, prune away it's neighbors so we get more diverse points
+        selected_midpoints = []
+        while(len(sorted_candidates) > 0 and len(selected_midpoints) < keep_n):
+            curr = sorted_candidates.pop(0)
+            selected_midpoints.append(curr)
+            neighbors = set(self.graph_provider.get_neighbors(curr))
+            old_neighbors = neighbors
+            for _ in range(prune_depth - 1):
+                new_neighbors = [n for node in old_neighbors for n in self.graph_provider.get_neighbors(node)]
+                new_neighbors = set(new_neighbors)
+                neighbors = neighbors.union(new_neighbors)
+                old_neighbors = new_neighbors
+            sorted_candidates = [node for node in sorted_candidates if node not in neighbors]
+        return selected_midpoints
 
-        # Now get shortest paths to each of the keeps, and select the best path
-        best_res = result
-        for node in keep:
-            res_to_node = reconstruct_result(node, ss_result_start, backward=False)
-            res_to_end = reconstruct_result(node, ss_result_end, backward=True)
-            merged = merge_results(res_to_node, res_to_end)
+    def __obtain_full_result(self, midpoint):
+        assert self._single_source_data is not None, SS_NOT_COMPUTED_MSG
+        ss_start = self._single_source_data['start']
+        ss_end = self._single_source_data['end']
 
-            if merged['path_len'] <= max_path_len:
-                if merged['ele_gain'] > best_res['ele_gain']:
-                    best_path_to_node = res_to_node['path']
-                    best_path_to_end = res_to_end['path']
-                    best_res = merged
+        res_to_midpoint = self.__reconstruct_result(midpoint, ss_start, backward=False)
+        res_to_end = self.__reconstruct_result(midpoint, ss_end, backward=True)
+        merged = self.__merge_results(res_to_midpoint, res_to_end)
 
-        print(f"\nTook another {time.time() - end_time} seconds to finish processing\n")
-        return best_res
+        return merged
+
+    def search(self, start, end, max_path_len, keep_n=10, prune_depth=3):
+        self.__compute_single_source_data(start, end)
+
+        filter_func = self.__filter_func_factory(start, end, max_path_len)
+        midpoint_candidates = filter(filter_func, self.graph_provider.get_all_nodes())
+
+        sort_func = self.__sort_func_factory(start, end)
+        sorted_candidates = sorted(midpoint_candidates, key=sort_func, reverse=True)
+
+        selected_midpoints = self.__select_and_prune(sorted_candidates, keep_n, prune_depth)
+
+        results = [self.__obtain_full_result(midpoint) for midpoint in selected_midpoints]
+
+        best_result = {'path': [], 'path_len': inf, 'ele_gain': -inf}
+        for result in results:
+            if result['ele_gain'] > best_result['ele_gain']:
+                best_result = result
+
+        return best_result
+
