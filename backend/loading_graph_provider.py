@@ -3,12 +3,17 @@ import networkx as nx
 from collections import defaultdict
 from backend.keys import api_key
 import math
+from backend.graph_provider import GraphProvider
 
 CHUNK_SIZE = 0.01
 
-class LoadingGraphProvider():
+class LoadingGraphProvider(GraphProvider):
     loaded_chunks = defaultdict(lambda: defaultdict(lambda: False))
     graph = nx.MultiDiGraph()
+
+    def __init__(self, origin_coords, destination_coords):
+        self.start = self.find_node_near(origin_coords)
+        self.end = self.find_node_near(destination_coords)
 
     def find_node_near(self, node):
         x = node[1]

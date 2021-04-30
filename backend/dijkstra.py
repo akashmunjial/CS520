@@ -39,7 +39,7 @@ class Dijkstra:
                     predecessor = prev[predecessor]
                 path.reverse() # Make list begin with 'start' node
                 print('Path Found: ', path)
-                return path
+                return path, curr_dist
 
             neighbors = self.graph.get_neighbors(curr_node)
             for n in neighbors:
@@ -58,5 +58,5 @@ class Dijkstra:
         """
 
         print("No path found")
-        return []
+        return [], math.inf
 

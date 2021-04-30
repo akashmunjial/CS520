@@ -13,6 +13,22 @@
         <div id="sidebar">
             <div id="title">EleNa</div>
             <br>
+            <form id="search-form" onsubmit="return false">
+                <section>
+                    <fieldset>
+                        <legend>Search</legend>
+
+                        <input type="text" id="place" name="place" size="25" value="Amherst, MA" required>
+                    </fieldset>
+                </section>
+                <br>
+                <section>
+                    <div id="submit-div">
+                        <input type="submit" id="search-submit" name="search-submit" value="Search for Place"></input>
+                    </div>
+                </section>
+            </form>
+            <br>
             <form id="form" onsubmit="return false">
                 <section>
                     <fieldset>
@@ -35,43 +51,55 @@
                         <legend>Distance</legend>
 
                         <label>Up to </label>
-                        <input type="number" id="distance" name="distance" min="100" max="200" value="150">
+                        <input type="number" id="distance" name="distance" min="100" max="300" value="200">
                         <label for="distance">% of the shortest path</label>
                     </fieldset>
                 </section>
                 <br>
                 <section>
                     <fieldset>
-                        <legend>Transporation</legend>
-                        <input type="radio" id="drive" name="transport" value="drive">
-                        <label for="drive">Driving</label>
+                        <legend>Goal</legend>
+
+                        <input type="radio" id="maxmial" name="elevation" value="maxmial" checked>
+                        <label for="maxmial">Maximal Elevation</label>
                         <br>
 
-                        <input type="radio" id="bike" name="transport" value="bike">
-                        <label for="bike">Biking</label>
+                        <input type="radio" id="minimal" name="elevation" value="minimal">
+                        <label for="minimal">Minimal Elevation</label>
                         <br>
 
-                        <input type="radio" id="walk" name="transport" value="walk" checked>
-                        <label for="walk">Walking</label>
+                        <input type="radio" id="shortest" name="elevation" value="shortest">
+                        <label for="shortest">Shortest Path</label>
                     </fieldset>
                 </section>
                 <br>
                 <section>
                     <fieldset>
-                        <legend>Elevation</legend>
+                        <legend>Graph</legend>
 
-                        <input type="radio" id="maxmial" name="elevation" value="maxmial" checked>
-                        <label for="maxmial">Maximal</label>
+                        <input type="radio" id="bounded" name="graph" value="bounded" checked>
+                        <label for="bounded">Bounded Area</label>
                         <br>
 
-                        <input type="radio" id="minimal" name="elevation" value="minimal">
-                        <label for="minimal">Minimal</label>
+                        <input type="radio" id="loading" name="graph" value="loading">
+                        <label for="loading">Lazy Loading</label>
                     </fieldset>
                 </section>
                 <br>
                 <section>
                     <div id="submit-div">
                         <input type="submit" id="submit" name="submit" value="Generate Route"></input>
+                    </div>
+                </section>
+                <br>
+                <section>
+                    <div id='wrapper'>
+                        <div id="throbber-div">
+                            <img id="throbber" name="throbber" src="/frontend/throbber.gif">
+                        </div>
+                        <div id="stats-div">
+                            <div id="stats"></div>
+                        </div>
                     </div>
                 </section>
             </form>

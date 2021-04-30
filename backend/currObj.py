@@ -1,10 +1,11 @@
 class CurrObj(object):
-    def __init__(self, node, parent, heuristicDist, actualDist):
+    def __init__(self, node, parent, heuristicDist, actualDist, elevationGain):
         super().__init__()
         self.node = node
         self.parent = parent
         self.heuristicDist = heuristicDist
         self.actualDist = actualDist
+        self.elevationGain = elevationGain
 
     def getParent(self):
         return self.parent
@@ -27,5 +28,13 @@ class CurrObj(object):
     def setHeuristicDist(self,dist):
         self.heuristicDist = dist
 
+    def getElevationData(self):
+        return self.elevationGain
+
+    def setElevationData(self, elevationGain):
+        self.elevationGain  = elevationGain
+
     def __lt__(self, other):
         return self.heuristicDist < other.heuristicDist
+
+    

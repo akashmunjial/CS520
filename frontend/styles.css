@@ -30,6 +30,24 @@ input, label {
     justify-content: center;
 }
 
+#wrapper {
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+#throbber-div {
+    position: absolute;
+    visibility: hidden;
+}
+
+#stats-div {
+    position: absolute;
+    visibility: hidden;
+    white-space: pre;
+    font-family: "monospace";
+}
+
 #sidebar {
     height: 100%;
     width: 20%;
@@ -44,4 +62,5 @@ input, label {
 #map {
     height: 100vh;
     margin-left: 20%;
+    z-index: 1;
 }
