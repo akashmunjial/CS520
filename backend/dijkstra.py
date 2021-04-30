@@ -100,6 +100,7 @@ class Dijkstra:
                 result['ele_gain'] = cum_ele_diff
                 return result
 
+
             neighbors = list(self.graph_provider.get_neighbors(curr_node))
 
             for i, n in enumerate(neighbors):

@@ -14,6 +14,8 @@ class BoundedGraphProvider(GraphProvider):
         #self.graph = osmnx.graph.graph_from_bbox(n + abs(e - w), s - abs(n - s), e + abs(w - e), w - abs(w - e), simplify=False, network_type='walk')
         self.graph = osmnx.graph.graph_from_bbox(n + longer_diff, s - longer_diff, e + longer_diff, w - longer_diff, simplify=False, network_type='walk')
         osmnx.elevation.add_node_elevations(self.graph, api_key=api_key)
+        self.start = self.find_node_near(start)
+        self.end = self.find_node_near(end)
 
     def find_node_near(self, node):
         return osmnx.distance.get_nearest_node(self.graph, node, method='euclidean')
