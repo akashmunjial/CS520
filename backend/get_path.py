@@ -3,9 +3,11 @@ from backend.search_algs.a_star import AStar
 from backend.search_algs.dijkstra import Dijkstra
 from backend.graph_providers.loading_graph_provider import LoadingGraphProvider
 from backend.graph_providers.bounded_graph_provider import BoundedGraphProvider
+from backend.timeout import timeout
 
 # This is a temporary implementation to get a full feedback loop
-def get_route(ori, dest, dist, ele, grph):
+@timeout(40)
+def get_path(ori, dest, dist, ele, grph):
     
     # translate geodata for osmnx '(lat, lng)' -> (lat, lng)
     try:
@@ -22,12 +24,17 @@ def get_route(ori, dest, dist, ele, grph):
         graph_provider = LoadingGraphProvider(start_coords, end_coords)
     
     # Choose between Dijkstra and AStar based on form input
-    if(ele == 'shortest'):
-        search_algo = Dijkstra(graph_provider)
-    else:
-        search_algo = AStar(graph_provider, False, 99999)
-    route = search_algo.search(graph_provider.start, graph_provider.end)
+    # if(ele == 'shortest'):
+    #     search_algo = Dijkstra(graph_provider)
+    # else:
+    #     search_algo = AStar(graph_provider, ele, int(dist) * 1000000)
+    # route = search_algo.search(graph_provider.start, graph_provider.end)
+    shortest = Dijkstra(graph_provider)
+    path, length = shortest.search(graph_provider.start, graph_provider.end)
+    search = AStar(graph_provider, ele, int(dist)*length/100)
+    route = search.search(graph_provider.start, graph_provider.end)
+    stats = [1000, 100, 1500, 500]
     
     # convert nodes to coordinates and return
     route_coords = [(node['y'], node['x']) for node in map(graph_provider.get_coords, route)]
-    return route_coords
+    return route_coords, stats

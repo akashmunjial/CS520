@@ -30,9 +30,22 @@ input, label {
     justify-content: center;
 }
 
-#throbber-div{
+#wrapper {
+    position: relative;
     display: flex;
     justify-content: center;
+}
+
+#throbber-div {
+    position: absolute;
+    visibility: hidden;
+}
+
+#stats-div {
+    position: absolute;
+    visibility: hidden;
+    white-space: pre;
+    font-family: "monospace";
 }
 
 #sidebar {
