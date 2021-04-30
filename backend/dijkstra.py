@@ -1,31 +1,81 @@
-import heapq
-import math
-import osmnx
+from math import inf
 from collections import defaultdict
-from backend.keys import api_key
+from heapdict import heapdict
 
 '''
 Essentially follows the implementation here: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm#Using_a_priority_queue
 '''
 class Dijkstra:
-    def __init__(self, graph):
-        self.graph = graph
+    def __init__(self, graph_provider):
+        self.graph_provider = graph_provider
 
-    def distance(self, node1, node2):
-        return self.graph.get_edge_distance(node1, node2)
+    def __distance(self, node1, node2):
+        return self.graph_provider.get_edge_distance(node1, node2)
 
-    def search(self, start, end):
-        prev = {}
-        dist = defaultdict(lambda: math.inf)
+    def __elevation(self, node):
+        return self.graph_provider.get_coords(node)['z']
+
+    def single_source(self, start):
+        prev = defaultdict(lambda: None)
+        dist = defaultdict(lambda: inf) # The weight of the current minimum-weight path to a node
+        ele_diff = {}
         visited = set()
-        priority_queue = []
+        priority_queue = heapdict()
 
         prev[start] = None
-        dist[start] = 0
-        heapq.heappush(priority_queue, (dist[start], start))
-
+        dist[start] = 0.
+        ele_diff[start] = 0.
+        priority_queue[start] = dist[start]
         while len(priority_queue) > 0:
-            curr_dist, curr_node = heapq.heappop(priority_queue)
+            curr_node, curr_dist = priority_queue.popitem()
+            visited.add(curr_node)
+            neighbors = list(self.graph_provider.get_neighbors(curr_node))
+            for n in neighbors:
+                if n in visited:
+                    continue
+                alt_path_dist = dist[curr_node] + self.__distance(curr_node, n)
+                curr_ele_diff = self.__elevation(n) - self.__elevation(curr_node)
+                if alt_path_dist < dist[n]:
+                    ele_diff[n] = curr_ele_diff
+                    dist[n] = alt_path_dist
+                    prev[n] = curr_node
+                    priority_queue[n] = dist[n]
+
+        result = {
+                'prev': prev,
+                'dist': dist,
+                'ele_diff': ele_diff
+                }
+
+        return result
+
+    def search(self, start, end, use_elevation=False, max_path_len=inf, backward=False):
+        if use_elevation:
+            assert max_path_len != inf, "If we want to use elevation data, we need a finite maximum path length we cannot exceed"
+
+        result = {
+                'path': [],
+                'path_len': inf,
+                'ele_gain': inf,
+                }
+
+        prev = {}
+        dist = {}
+        weight = defaultdict(lambda: inf) # The weight of the current minimum-weight path to a node
+        ele_diff = {}
+        visited = set()
+        priority_queue = heapdict()
+
+        ele_start = self.__elevation(start)
+        ele_end = self.__elevation(end)
+
+        prev[start] = None
+        dist[start] = 0.
+        weight[start] = 0.
+        ele_diff[start] = 0.
+        priority_queue[start] = weight[start]
+        while len(priority_queue) > 0:
+            curr_node, curr_weight = priority_queue.popitem()
 
             '''Mark as visited, which implies dist[curr_node] currently
             contains shortest distance between 'start' and 'curr_node'
@@ -34,29 +84,45 @@ class Dijkstra:
             if curr_node == end:
                 path = [end]
                 predecessor = prev[end]
+                cum_ele_diff = 0.
                 while predecessor is not None:
                     path.append(predecessor)
+                    if backward:
+                        cum_ele_diff += max([0., -ele_diff[predecessor]])
+                    else:
+                        cum_ele_diff += max([0., ele_diff[predecessor]])
                     predecessor = prev[predecessor]
-                path.reverse() # Make list begin with 'start' node
-                print('Path Found: ', path)
-                return path, curr_dist
+                if not backward:
+                    path.reverse() # Make list begin with 'start' node
+                path_len = dist[end]
+                result['path'] = path
+                result['path_len'] = path_len
+                result['ele_gain'] = cum_ele_diff
+                return result
 
-            neighbors = self.graph.get_neighbors(curr_node)
-            for n in neighbors:
+
+            neighbors = list(self.graph_provider.get_neighbors(curr_node))
+
+            for i, n in enumerate(neighbors):
                 if n in visited:
                     continue
-                alt_path_dist = curr_dist + self.distance(curr_node, n)
-                if alt_path_dist < dist[n]:
-                    dist[n] = alt_path_dist
-                    prev[n] = curr_node
-                    heapq.heappush(priority_queue, (alt_path_dist, n))
 
-        """
-        Should we only allow a node to appear once in the priority queue? This
-        is memory-efficient, but requires us to do a linear search every time we
-        want to update a node's priority queue value.
-        """
+                alt_path_dist = dist[curr_node] + self.__distance(curr_node, n)
+                ele_n = self.__elevation(n)
+                curr_ele_diff = ele_n - self.__elevation(curr_node)
+                if use_elevation:
+                    heuristic_weight = max([0., curr_ele_diff])
+                    alt_path_weight = curr_weight + heuristic_weight
+                else:
+                    alt_path_weight = alt_path_dist
+
+                if alt_path_dist <= max_path_len:
+                    if alt_path_weight < weight[n]:
+                        ele_diff[n] = curr_ele_diff
+                        dist[n] = alt_path_dist
+                        weight[n] = alt_path_weight
+                        prev[n] = curr_node
+                        priority_queue[n] = weight[n]
 
         print("No path found")
-        return [], math.inf
-
+        return result

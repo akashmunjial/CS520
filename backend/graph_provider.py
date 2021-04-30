@@ -12,3 +12,7 @@ class GraphProvider(ABC):
     @abstractmethod
     def get_coords(self, node):
         pass
+
+    @abstractmethod
+    def get_all_nodes(self):
+        pass
