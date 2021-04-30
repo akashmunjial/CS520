@@ -49,12 +49,14 @@ search_submit.addEventListener('click', function() {
 // The names are self-explanatory
 // It also instantiates dummy polyline so it can be replaced later
 
-var polyline_route = L.polyline([0,0][0,0]);
+var new_route = L.polyline([0,0][0,0]);
+var short_route = L.polyline([0,0][0,0]);
 
 function send_route_request() {
   console.log('Sending route request...');
   // Immediately erase existing route
-  polyline_route.remove();
+  new_route.remove();
+  short_route.remove();
   let request = new XMLHttpRequest();
   // Set the callback function once the route is loaded
   request.onreadystatechange = function() {
@@ -82,9 +84,12 @@ function update_map_route(response) {
     // Pan to the center of the origin and destination
     map.panTo(new L.LatLng((obj.route[obj.route.length-1][0] + obj.route[0][0]) / 2, 
                           (obj.route[obj.route.length-1][1] + obj.route[0][1]) / 2));
-    polyline_route = L.polyline(obj.route, color='#ff0000');
-    polyline_route.setStyle({color:'red'});
-    polyline_route.addTo(map);
+    short_route = L.polyline(obj.short_route);
+    short_route.setStyle({color:'black'});
+    short_route.addTo(map);
+    new_route = L.polyline(obj.route);
+    new_route.setStyle({color:'red'});
+    new_route.addTo(map);
     console.log('Done.');
     // Print stats
     if(obj.stats[2]==-1 && obj.stats[3]==-1) {

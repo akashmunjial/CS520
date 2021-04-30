@@ -15,8 +15,8 @@ def route():
     graph = request.form['graph']
 
     # Get recomended route
-    route, stats = get_route(origin, destination, distance, elevation, graph)
-    return jsonify(route=route, stats=stats)
+    route, short_route, stats = get_route(origin, destination, distance, elevation, graph)
+    return jsonify(route=route, short_route=short_route, stats=stats)
 
 @dummy_route.route('/search', methods = ['POST'])
 def search():

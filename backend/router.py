@@ -38,6 +38,8 @@ def get_route(ori, dest, dist, ele, grph):
 
     stats = [round(float(shortest_res['path_len'])), round(float(shortest_res['ele_gain'])), round(float(res['path_len'])), round(float(res['ele_gain']))]
     route = res['path']
+    shortest_route = shortest_res['path']
 
     route_coords = [(node['y'], node['x']) for node in map(graph_provider.get_coords, route)]
-    return route_coords, stats
+    shortest_route_coords = [(node['y'], node['x']) for node in map(graph_provider.get_coords, shortest_route)]
+    return route_coords, shortest_route_coords, stats
