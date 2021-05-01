@@ -19,7 +19,7 @@ def route():
     if results == None:
         return jsonify(error="timeout")
     else:
-        return jsonify(route=results[0], stats=results[1])
+        return jsonify(route=results[0], short_route=results[1], stats=results[2])
 
 @routes.route('/search', methods = ['POST'])
 def search():
