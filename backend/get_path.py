@@ -8,7 +8,7 @@ from backend.graph_providers.loading_graph_provider import LoadingGraphProvider
 from backend.graph_providers.bounded_graph_provider import BoundedGraphProvider
 from backend.timeout import timeout
 
-# @timeout(40)
+@timeout(80)
 def get_path(ori, dest, dist, ele, grph):
     
     # Translate geodata for osmnx '(lat, lng)' -> (lat, lng)

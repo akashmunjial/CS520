@@ -76,7 +76,13 @@ const stats = document.querySelector('#stats');
 
 function update_map_route(response) {
   let obj = JSON.parse(response);
-  if(obj.route.length === 0) {
+  if (obj.error === 'timeout') {
+    alert('Timed out while looking for path');
+    console.log('Timed out');
+  } else if (obj.error === 'badcoords') {
+    alert('Please select both an origin and a destination');
+    console.log('Missing coords');
+  } else if(obj.route.length === 0) {
     alert('No path found');
     console.log('No path found');
   } else {
