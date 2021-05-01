@@ -3,8 +3,7 @@ import networkx as nx
 from collections import defaultdict
 from backend.keys import api_key
 import math
-
-from backend.graph_provider import GraphProvider
+from backend.graph_providers.graph_provider import GraphProvider
 
 CHUNK_SIZE = 0.01
 

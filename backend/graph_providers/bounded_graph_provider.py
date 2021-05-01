@@ -1,7 +1,7 @@
 import osmnx
 from backend.keys import api_key
 import math
-from backend.graph_provider import GraphProvider
+from backend.graph_providers.graph_provider import GraphProvider
 
 class BoundedGraphProvider(GraphProvider):
 
@@ -31,7 +31,7 @@ class BoundedGraphProvider(GraphProvider):
         p2 = self.get_coords(n2)
         return math.sqrt(
             (p1['x'] - p2['x']) ** 2 +
-            (p1['y'] - p2['y']) ** 2
+            (p1['y'] - p2['y']) ** 2 +
             (p1['z'] - p2['z']) ** 2
         )
 

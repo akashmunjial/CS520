@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request
 import sys
 
-from backend.dummy_route import dummy_route
+from backend.routes import routes
 
 # Initialize flask server
 app = Flask(__name__, static_folder="frontend", template_folder="frontend")
@@ -11,7 +11,7 @@ app = Flask(__name__, static_folder="frontend", template_folder="frontend")
 def serve_frontend():
     return render_template('index.htm')
 
-app.register_blueprint(dummy_route)
+app.register_blueprint(routes)
 
 print('DONE!')
 

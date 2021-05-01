@@ -7,7 +7,7 @@ class Timeout(Exception):
 def raise_timeout(*args):
     raise Timeout()
 
-def timeout(*, seconds):
+def timeout(seconds):
     def decorator(func):
         @wraps(func)
         def wrapped_func(*args, **kwargs):
