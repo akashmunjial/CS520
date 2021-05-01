@@ -1,7 +1,7 @@
 from math import inf
 
 from backend.search_algs.dijkstra import Dijkstra
-
+from backend.search_algs.search_result import SearchResult
 
 SS_NOT_COMPUTED_MSG = "We have not computed the single source data yet."
 
@@ -98,13 +98,12 @@ class MidpointMiracle:
         path_to_node.append(shared_node)
         sub_from_gain -= to_node_contributions[shared_node]
 
-        merged = {}
         # Handle path differently
-        merged['path'] = path_to_node + path_to_end[i:]
-        merged['path_len'] = dist_prefix[shared_node] + dist_suffix[shared_node]
-        merged['ele_gain'] = res_to_node['ele_gain'] + res_to_end['ele_gain'] - sub_from_gain
-
-        return merged
+        return SearchResult(
+            path=path_to_node + path_to_end[i:],
+            path_len=dist_prefix[shared_node] + dist_suffix[shared_node],
+            ele_gain=res_to_node['ele_gain'] + res_to_end['ele_gain'] - sub_from_gain
+        )
 
     def __reconstruct_result(self, end, ss_result, backward=False):
             prev = ss_result['prev']
@@ -132,12 +131,12 @@ class MidpointMiracle:
             path_len = dist[end]
 
             result = {
-                    'path': path,
-                    'path_len': path_len,
-                    'ele_gain': cum_ele_diff,
-                    'contributions': contributions,
-                    'dist': dist
-                    }
+                'path': path,
+                'path_len': path_len,
+                'ele_gain': cum_ele_diff,
+                'contributions': contributions,
+                'dist': dist
+            }
 
             return result
 
@@ -181,11 +180,7 @@ class MidpointMiracle:
         selected_midpoints = self.__select_and_prune(sorted_candidates, keep_n, prune_depth)
 
         results = [self.__obtain_full_result(midpoint) for midpoint in selected_midpoints]
-
-        best_result = {'path': [], 'path_len': inf, 'ele_gain': -inf}
-        for result in results:
-            if result['ele_gain'] > best_result['ele_gain']:
-                best_result = result
+        best_result = max(results, key=lambda r: r.ele_gain)
 
         return best_result
 

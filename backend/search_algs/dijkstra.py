@@ -1,6 +1,7 @@
 from math import inf
 from collections import defaultdict
 from heapdict import heapdict
+from backend.search_algs.search_result import SearchResult
 
 '''
 Essentially follows the implementation here: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm#Using_a_priority_queue
@@ -42,22 +43,16 @@ class Dijkstra:
                     priority_queue[n] = dist[n]
 
         result = {
-                'prev': prev,
-                'dist': dist,
-                'ele_diff': ele_diff
-                }
+            'prev': prev,
+            'dist': dist,
+            'ele_diff': ele_diff
+        }
 
         return result
 
     def search(self, start, end, use_elevation=False, max_path_len=inf, backward=False):
         if use_elevation:
             assert max_path_len != inf, "If we want to use elevation data, we need a finite maximum path length we cannot exceed"
-
-        result = {
-                'path': [],
-                'path_len': inf,
-                'ele_gain': inf,
-                }
 
         prev = {}
         dist = {}
@@ -95,10 +90,7 @@ class Dijkstra:
                 if not backward:
                     path.reverse() # Make list begin with 'start' node
                 path_len = dist[end]
-                result['path'] = path
-                result['path_len'] = path_len
-                result['ele_gain'] = cum_ele_diff
-                return result
+                return SearchResult(path, path_len, cum_ele_diff)
 
 
             neighbors = list(self.graph_provider.get_neighbors(curr_node))
@@ -125,4 +117,4 @@ class Dijkstra:
                         priority_queue[n] = weight[n]
 
         print("No path found")
-        return result
+        return SearchResult()

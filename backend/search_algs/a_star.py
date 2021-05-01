@@ -4,6 +4,7 @@ import osmnx
 from backend.keys import api_key 
 from backend.search_algs.utils.node_data import NodeData
 from backend.search_algs.utils.node_id_wrapper import NodeIdWrapper, NodeIdWrapperFactory
+from backend.search_algs.search_result import SearchResult
 
 class AStar:
     def __init__(self, graph):
@@ -34,11 +35,11 @@ class AStar:
             visited_nodes.add(curr.id)
 
             if curr.id == end:
-                return {
-                    'path': self.make_path(curr, node_data_map),
-                    'path_len': curr.actual_dist,
-                    'ele_gain': curr.elevation_gain
-                }
+                return SearchResult(
+                    path=self.make_path(curr, node_data_map),
+                    path_len=curr.actual_dist,
+                    ele_gain=curr.elevation_gain
+                )
 
             neighbors = self.graph.get_neighbors(curr.id)
             unvisited_neighbors = filter(lambda n: n not in visited_nodes, neighbors)
@@ -63,7 +64,7 @@ class AStar:
                         heapq.heappush(nodes_to_visit, wrap_node_id(n))
 
         print("No path found")
-        return { 'path': [], 'path_len': math.inf, 'ele_gain': math.inf }
+        return SearchResult()
 
     def make_path(self, end_node, node_data_map):
         path = []

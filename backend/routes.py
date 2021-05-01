@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 import osmnx
 from backend.get_path import get_path
+import json
 
 routes = Blueprint('routes', __name__, template_folder='frontend')
 
@@ -19,7 +20,7 @@ def route():
     if results == None:
         return jsonify(error="timeout")
     else:
-        return jsonify(route=results[0], short_route=results[1], stats=results[2])
+        return jsonify(results)
 
 @routes.route('/search', methods = ['POST'])
 def search():
