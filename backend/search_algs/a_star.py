@@ -13,8 +13,13 @@ class AStar:
     def elevation_heuristic(self, node1, node2, find_maximal=False):
         n1 = self.graph.get_coords(node1)
         n2 = self.graph.get_coords(node2)
-        elevation_gain = max(0, (n2['z'] - n1['z']) ** 3)
+        elevation_gain = max(0, (n2['z'] - n1['z'])**3)
         return -elevation_gain if find_maximal else elevation_gain
+
+    def elevation_gain(self, node1, node2):
+        n1 = self.graph.get_coords(node1)
+        n2 = self.graph.get_coords(node2)
+        return max(0, (n2['z'] - n1['z']))
 
     def distance_heuristic(self, node1, node2):
         n1 = self.graph.get_coords(node1)
@@ -48,22 +53,20 @@ class AStar:
                 if dist <= max_path_len:
                     is_in_node_map = n in node_data_map
                     
-                    dist_heuristic = dist + self.distance_heuristic(curr.id, n)
+                    dist_heuristic = dist + self.distance_heuristic(n, end)
                     elevation_heuristic = curr.elevation_gain + self.elevation_heuristic(curr.id, n, find_maximal) 
                     node_data_map[n] = NodeData(
                         id=n,
                         parent=curr.id,
                         heuristic_dist=elevation_heuristic if use_elevation else dist_heuristic,
                         actual_dist=dist,
-                        elevation_gain=elevation_heuristic
+                        elevation_gain=curr.elevation_gain + self.elevation_gain(curr.id, n)
                     )
-
                     if is_in_node_map:
                         heapq.heapify(nodes_to_visit)
                     else:
                         heapq.heappush(nodes_to_visit, wrap_node_id(n))
 
-        print("No path found")
         return SearchResult()
 
     def make_path(self, end_node, node_data_map):
@@ -73,5 +76,4 @@ class AStar:
             path.insert(0, curr.id)
             curr = node_data_map[curr.parent]
         path.insert(0, curr.id)
-        print('Path Found: ', path)
         return path
