@@ -31,13 +31,15 @@ def get_path(ori, dest, dist, ele, grph):
 
     # Compute path with desired quality
     max_path_len = shortest_res.path_len * int(dist) / 100
+    res = shortest_res
+    alt_res = None
     if ele == 'minimal':
-        res = astar.search(graph_provider.start, graph_provider.end, max_path_len, use_elevation=True)
+        alt_res = astar.search(graph_provider.start, graph_provider.end, max_path_len, use_elevation=True)
     elif ele == 'maximal':
         maximal = MidpointMiracle(graph_provider)
-        res = maximal.search(graph_provider.start, graph_provider.end, max_path_len)
-    else:
-        res = shortest_res
+        alt_res = maximal.search(graph_provider.start, graph_provider.end, max_path_len)
+    if alt_res is not None and alt_res.ele_gain > res.ele_gain:
+        res = alt_res
 
     return compute_stats(graph_provider, shortest_res, res)
 
