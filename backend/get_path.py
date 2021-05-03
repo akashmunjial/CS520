@@ -38,8 +38,11 @@ def get_path(ori, dest, dist, ele, grph):
     elif ele == 'maximal':
         maximal = MidpointMiracle(graph_provider)
         alt_res = maximal.search(graph_provider.start, graph_provider.end, max_path_len)
-    if alt_res is not None and alt_res.ele_gain > res.ele_gain:
-        res = alt_res
+    if alt_res is not None:
+        if ele == 'maximal' and alt_res.ele_gain > res.ele_gain:
+            res = alt_res
+        elif ele == 'minimal' and alt_res.ele_gain < res.ele_gain:
+            res = alt_res
 
     return compute_stats(graph_provider, shortest_res, res)
 
