@@ -91,7 +91,7 @@ function update_map_route(response) {
     map.panTo(new L.LatLng((obj.route[obj.route.length-1][0] + obj.route[0][0]) / 2, 
                           (obj.route[obj.route.length-1][1] + obj.route[0][1]) / 2));
     short_route = L.polyline(obj.short_route);
-    short_route.setStyle({color:'black'});
+    short_route.setStyle({color:'blue'});
     short_route.addTo(map);
     new_route = L.polyline(obj.route);
     new_route.setStyle({color:'red'});
