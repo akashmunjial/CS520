@@ -50,8 +50,8 @@ class Dijkstra:
 
         return result
 
-    def search(self, start, end, use_elevation=False, max_path_len=inf, backward=False):
-        if use_elevation:
+    def search(self, start, end, minimize_ele=False, max_path_len=inf, backward=False):
+        if minimize_ele:
             assert max_path_len != inf, "If we want to use elevation data, we need a finite maximum path length we cannot exceed"
 
         prev = {}
@@ -102,7 +102,7 @@ class Dijkstra:
                 alt_path_dist = dist[curr_node] + self.__distance(curr_node, n)
                 ele_n = self.__elevation(n)
                 curr_ele_diff = ele_n - self.__elevation(curr_node)
-                if use_elevation:
+                if minimize_ele:
                     heuristic_weight = max([0., curr_ele_diff])
                     alt_path_weight = curr_weight + heuristic_weight
                 else:
