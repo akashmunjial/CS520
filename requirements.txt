@@ -8,3 +8,4 @@ kthread==0.2.2
 sphinx==2.2.0
 sphinxcontrib-napoleon==0.7
 sphinx_rtd_theme==0.5.2
+pytest==5.2.1
