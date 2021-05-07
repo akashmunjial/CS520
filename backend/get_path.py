@@ -43,18 +43,29 @@ def get_path(ori, dest, dist, ele, grph):
         elif ele == 'minimal' and alt_res.ele_gain < res.ele_gain:
             res = alt_res
 
-    return compute_stats(graph_provider, shortest_res, res)
+    return make_result_json(graph_provider, shortest_res, res)
 
-    
-def compute_stats(graph_provider, shortest_res, res):
-    stats = list(map(round, [shortest_res.path_len, shortest_res.ele_gain, res.path_len, res.ele_gain]))
+# Calculates the information that is displayed by the frontend
+def make_result_json(graph_provider, shortest_res, res):
     route = res.path
     shortest_route = shortest_res.path
 
+    # Convert list of node ids to (lat, lng) coordinates
     route_coords = [(node['y'], node['x']) for node in map(graph_provider.get_coords, route)]
     shortest_route_coords = [(node['y'], node['x']) for node in map(graph_provider.get_coords, shortest_route)]
+
+    # Return coordinate sequences and route statistics
     return {
         'route': route_coords,
-        'short_route': shortest_route_coords,
-        'stats': stats
+        'shortRoute': shortest_route_coords,
+        'stats': {
+            'shortestPath': {
+                'pathLength': round(shortest_res.path_len),
+                'elevationGain': round(shortest_res.ele_gain)
+            },
+            'resultPath': {
+                'pathLength': round(res.path_len),
+                'elevationGain': round(res.ele_gain)
+            }
+        }
     }

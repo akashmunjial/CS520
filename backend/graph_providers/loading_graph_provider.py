@@ -5,9 +5,13 @@ from backend.keys import api_key
 import math
 from backend.graph_providers.graph_provider import GraphProvider
 
+# Side length of chunk in degrees
 CHUNK_SIZE = 0.01
 
 class LoadingGraphProvider(GraphProvider):
+    # The keys to the loaded_chunks dict are given as integers in units of CHUNK_SIZE
+    # (e.g. if CHUNK_SIZE=0.01, then the bool describing whether chunk with...
+    # ...northeast corner (12deg, 12deg) would be stored in loaded_chunks[1200][1200])
     loaded_chunks = defaultdict(lambda: defaultdict(lambda: False))
     graph = nx.MultiDiGraph()
 
@@ -15,19 +19,24 @@ class LoadingGraphProvider(GraphProvider):
         self.start = self.find_node_near(origin_coords)
         self.end = self.find_node_near(destination_coords)
 
-    def find_node_near(self, node):
-        x = node[1]
-        y = node[0]
+    def find_node_near(self, coords):
+        # Load a 3x3 chunk square around the specified (lat, lng) coordinates
+        x = coords[1]
+        y = coords[0]
         chunk_x = math.floor(x / CHUNK_SIZE) * CHUNK_SIZE
         chunk_y = math.floor(y / CHUNK_SIZE) * CHUNK_SIZE
         self.load_chunk(chunk_x - CHUNK_SIZE, chunk_y - CHUNK_SIZE, 3, 3)
-        return osmnx.distance.get_nearest_node(self.graph, (y, x), method='euclidean')
+        # Once the chunks are loaded, then the nearest node can be calculated
+        return osmnx.distance.get_nearest_node(self.graph, coords, method='euclidean')
 
     def get_all_nodes(self):
         return self.graph.nodes
 
+    # Lazily loads chunks before returning neighbors of a node
     def get_neighbors(self, node):
         neighbors = list(self.graph.neighbors(node))
+        # If any of the node's neighbors fall outside the loaded chunks...
+        # ...then load the chunk they belong to first
         for neighbor in neighbors:
             coords = self.graph.nodes[neighbor]
             cx = math.floor(coords['x'] / CHUNK_SIZE) * CHUNK_SIZE
@@ -36,17 +45,22 @@ class LoadingGraphProvider(GraphProvider):
                 self.load_chunk(cx, cy)
         return neighbors
 
+    # Compute Euclidian distance between two nodes
     def get_distance_estimate(self, n1, n2):
         p1 = self.get_coords(n1)
         p2 = self.get_coords(n2)
+        # d = sqrt((x - x')^2 + (y - y')^2 + (z - z')^2)
         return math.sqrt(
             (p1['x'] - p2['x']) ** 2 +
             (p1['y'] - p2['y']) ** 2 +
             (p1['z'] - p2['z']) ** 2
         )
+
+    # Compute actual distance between two adjacent nodes
     def get_edge_distance(self, n1, n2):
         return self.graph.get_edge_data(n1, n2)[0]['length']
 
+    # Get x, y, and z coordinates from a node id
     def get_coords(self, node):
         node_data = self.graph.nodes[node]
         return {
@@ -56,17 +70,25 @@ class LoadingGraphProvider(GraphProvider):
         }
 
     def load_chunk(self, x, y, w = 1, h = 1):
+        # Get the northwest corner of the chunk
         x1 = math.floor(x / CHUNK_SIZE) * CHUNK_SIZE
         y1 = math.floor(y / CHUNK_SIZE) * CHUNK_SIZE
+        # Get the southeast corner of the chunk
         x2 = x1 + CHUNK_SIZE * w
         y2 = y1 + CHUNK_SIZE * h
         compose = nx.algorithms.operators.binary.compose
+        # Download the chunk as a graph, including edges that cross the chunk boundary
         subgraph = osmnx.graph.graph_from_bbox(y2, y1, x2, x1, simplify=False, truncate_by_edge=True)
+        # Add elevation data to the loaded chunk
         osmnx.elevation.add_node_elevations(subgraph, api_key)
+        # Merge the loaded chunk into the current graph
         self.graph = compose(self.graph, subgraph)
+        # Mark all the chunks as loaded
         for i in range(w):
             for j in range(h):
                 self.set_chunk_loaded(x1 + CHUNK_SIZE * i, y1 + CHUNK_SIZE * j)
+
+    # Helper methods for checking whether a chunk is loaded and marking it as loaded
 
     def is_chunk_loaded(self, x, y):
         cx = math.floor(x / CHUNK_SIZE)

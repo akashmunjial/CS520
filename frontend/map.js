@@ -52,7 +52,7 @@ const submit = document.getElementById('submit')
 const throbber = document.getElementById('throbber')
 const statsBox = document.getElementById('stats')
 
-function updateMapRoute({ error, stats, route, short_route: shortRoute }) {
+function updateMapRoute({ error, stats, route, shortRoute }) {
   if (error === 'timeout') {
     alert('Timed out while looking for path')
   } else if (error === 'badcoords') {
@@ -72,21 +72,25 @@ function updateMapRoute({ error, stats, route, short_route: shortRoute }) {
     newRouteLine.setStyle({color:'red'})
     newRouteLine.addTo(map)
     // Print stats
-    const prettyStats = [
-      `Shortest path length: ${stats[0]}m`,
-      `Shortest path elevation gain: ${stats[1]}m`
-    ]
-    if (stats[2] !== -1 || stats[3] !== -1) {
-      prettyStats.push(
-        `New path length: ${stats[2]}m`,
-        `New path elevation gain: ${stats[3]}m`
-      )
-    }
-    statsBox.textContent = prettyStats.join('\n')
-    statsBox.style.visibility = 'visible'
+    showStats(stats)
   }
   submit.disabled = false
   throbber.style.visibility = 'hidden'
+}
+
+function showStats({ shortestPath, resultPath }) {
+  const prettyStats = [
+    `Shortest path length: ${shortestPath.pathLength}m`,
+    `Shortest path elevation gain: ${shortestPath.elevationGain}m`
+  ]
+  if (resultPath.pathLength !== -1) {
+    prettyStats.push(
+      `New path length: ${resultPath.pathLength}m`,
+      `New path elevation gain: ${resultPath.elevationGain}m`
+    )
+  }
+  statsBox.textContent = prettyStats.join('\n')
+  statsBox.style.visibility = 'visible'
 }
 
 // Event listener to submit the route request
