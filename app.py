@@ -13,11 +13,10 @@ def serve_frontend():
 
 app.register_blueprint(routes)
 
-print('DONE!')
-
 # Set debug mode to false if user specifies --prod flag
 dev_mode = len(sys.argv) < 2 or sys.argv[1] != '--prod'
+app.debug=dev_mode
 
 # Start server
-app.debug=dev_mode
-app.run(host='0.0.0.0')
+if __name__ == "__main__":
+    app.run(host='0.0.0.0')
