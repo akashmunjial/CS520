@@ -1,7 +1,9 @@
 import osmnx
-from backend.keys import api_key
 import math
+
 from backend.graph_providers.graph_provider import GraphProvider
+from backend.keys import api_key
+
 
 class BoundedGraphProvider(GraphProvider):
 
@@ -18,10 +20,10 @@ class BoundedGraphProvider(GraphProvider):
         # Add elevation data into each node
         osmnx.elevation.add_node_elevations(self.graph, api_key=api_key)
         # Find the ids of the nodes in the graph closest to the start and end coordinates
-        self.start = self.find_node_near(start)
-        self.end = self.find_node_near(end)
+        self.start = self._find_node_near(start)
+        self.end = self._find_node_near(end)
 
-    def find_node_near(self, node):
+    def _find_node_near(self, node):
         return osmnx.distance.get_nearest_node(self.graph, node, method='euclidean')
 
     def get_all_nodes(self):

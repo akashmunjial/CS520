@@ -2,6 +2,7 @@ from backend.timeout import timeout
 from backend.search_algorithms.search_algorithm import SearchAlgorithm
 from backend.graph_providers.graph_provider import GraphProvider
 
+
 class PathFinder:
     def __init__(self,
             shortest_path_cls,
@@ -73,10 +74,10 @@ class PathFinder:
             if alt_res.ele_gain > res.ele_gain:
                 res = alt_res
 
-        return self.make_result_json(graph_provider, shortest_res, res)
+        return self._make_result_json(graph_provider, shortest_res, res)
 
     # Calculates the information that is displayed by the frontend
-    def make_result_json(self, graph_provider, shortest_res, res):
+    def _make_result_json(self, graph_provider, shortest_res, res):
         route = res.path
         shortest_route = shortest_res.path
 

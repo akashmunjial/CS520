@@ -12,10 +12,10 @@ class Dijkstra(SearchAlgorithm):
     def __init__(self, graph_provider):
         self.graph_provider = graph_provider
 
-    def __distance(self, node1, node2):
+    def _distance(self, node1, node2):
         return self.graph_provider.get_edge_distance(node1, node2)
 
-    def __elevation(self, node):
+    def _elevation(self, node):
         return self.graph_provider.get_coords(node)['z']
 
     def single_source(self, start):
@@ -46,8 +46,8 @@ class Dijkstra(SearchAlgorithm):
             for n in neighbors:
                 if n in visited:
                     continue
-                alt_path_dist = dist[curr_node] + self.__distance(curr_node, n)
-                curr_ele_diff = self.__elevation(n) - self.__elevation(curr_node)
+                alt_path_dist = dist[curr_node] + self._distance(curr_node, n)
+                curr_ele_diff = self._elevation(n) - self._elevation(curr_node)
                 if alt_path_dist < dist[n]:
                     ele_diff[n] = curr_ele_diff
                     dist[n] = alt_path_dist
@@ -72,8 +72,8 @@ class Dijkstra(SearchAlgorithm):
         visited = set()
         priority_queue = heapdict()
 
-        ele_start = self.__elevation(start)
-        ele_end = self.__elevation(end)
+        ele_start = self._elevation(start)
+        ele_end = self._elevation(end)
 
         prev[start] = None
         dist[start] = 0.
@@ -110,9 +110,9 @@ class Dijkstra(SearchAlgorithm):
                 if n in visited:
                     continue
 
-                alt_path_dist = dist[curr_node] + self.__distance(curr_node, n)
-                ele_n = self.__elevation(n)
-                curr_ele_diff = ele_n - self.__elevation(curr_node)
+                alt_path_dist = dist[curr_node] + self._distance(curr_node, n)
+                ele_n = self._elevation(n)
+                curr_ele_diff = ele_n - self._elevation(curr_node)
                 if minimize_ele:
                     heuristic_weight = max([0., curr_ele_diff])
                     alt_path_weight = curr_weight + heuristic_weight
