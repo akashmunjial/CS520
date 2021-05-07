@@ -21,6 +21,7 @@ async function sendSearchRequest() {
 }
 
 const searchSubmit = document.getElementById('search-submit')
+const distanceInput = document.getElementById('distance')
 
 function updateMapSearch({ coords }) {
   if (coords.length) {
@@ -91,6 +92,11 @@ function updateMapRoute({ error, stats, route, short_route: shortRoute }) {
 // Event listener to submit the route request
 
 submit.addEventListener('click', () => {
+  // Validate distance percent form
+  const percentDistance = document.getElementById('distance').value
+  if (!percentDistance || parseInt(percentDistance) < 100) {
+    return false
+  }
   // Immediately erase existing route and show spinner
   newRouteLine?.remove()
   shortRouteLine?.remove()
