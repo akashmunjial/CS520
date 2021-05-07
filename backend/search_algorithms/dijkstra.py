@@ -1,13 +1,13 @@
 from math import inf
 from collections import defaultdict
 from heapdict import heapdict
-from backend.search_algs.search_result import SearchResult
-from backend.search_algs.search_alg import SearchAlg
+from backend.search_algorithms.search_result import SearchResult
+from backend.search_algorithms.search_algorithm import SearchAlgorithm
 
 '''
 Essentially follows the implementation here: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm#Using_a_priority_queue
 '''
-class Dijkstra(SearchAlg):
+class Dijkstra(SearchAlgorithm):
     def __init__(self, graph_provider):
         self.graph_provider = graph_provider
 
@@ -18,6 +18,16 @@ class Dijkstra(SearchAlg):
         return self.graph_provider.get_coords(node)['z']
 
     def single_source(self, start):
+        """One line sumamry.
+
+        Some more stuff.
+
+        Args:
+            start: The start node (its integer id).
+
+        Returns:
+            A dict mapping stuff.
+        """
         prev = defaultdict(lambda: None)
         dist = defaultdict(lambda: inf) # The weight of the current minimum-weight path to a node
         ele_diff = {}

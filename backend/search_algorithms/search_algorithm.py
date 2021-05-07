@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-class SearchAlg(ABC):
+class SearchAlgorithm(ABC):
     @abstractmethod
     def __init__(self, graph_provider):
         pass
