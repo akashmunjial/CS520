@@ -32,7 +32,8 @@ class AStar(SearchAlgorithm):
     def distance(self, node1, node2):
         return self.graph_provider.get_edge_distance(node1, node2)
 
-    def search(self, start, end, max_path_len=math.inf, use_elevation=False, find_maximal=False):
+    def search(self, start, end, max_path_len=math.inf, find_maximal=False):
+        use_elevation = max_path_len < math.inf
         visited_nodes = set()
         node_data_map = { start: NodeData(start) }
         wrap_node_id = NodeIdWrapperFactory(node_data_map).make_wrapper
@@ -57,7 +58,7 @@ class AStar(SearchAlgorithm):
                     is_in_node_map = n in node_data_map
 
                     dist_heuristic = dist + self.distance_heuristic(n, end)
-                    elevation_heuristic = curr.elevation_gain + self.elevation_heuristic(curr.id, n, find_maximal) 
+                    elevation_heuristic = curr.elevation_gain + self.elevation_heuristic(curr.id, n, find_maximal)
                     node_data_map[n] = NodeData(
                         id=n,
                         parent=curr.id,

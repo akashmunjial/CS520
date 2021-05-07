@@ -1,6 +1,7 @@
-from math import inf
+import math
 from collections import defaultdict
 from heapdict import heapdict
+
 from backend.search_algorithms.search_result import SearchResult
 from backend.search_algorithms.search_algorithm import SearchAlgorithm
 
@@ -29,7 +30,7 @@ class Dijkstra(SearchAlgorithm):
             A dict mapping stuff.
         """
         prev = defaultdict(lambda: None)
-        dist = defaultdict(lambda: inf) # The weight of the current minimum-weight path to a node
+        dist = defaultdict(lambda: math.inf) # The weight of the current minimum-weight path to a node
         ele_diff = {}
         visited = set()
         priority_queue = heapdict()
@@ -61,13 +62,12 @@ class Dijkstra(SearchAlgorithm):
 
         return result
 
-    def search(self, start, end, max_path_len=inf, minimize_ele=False, backward=False):
-        if minimize_ele:
-            assert max_path_len != inf, "If we want to use elevation data, we need a finite maximum path length we cannot exceed"
+    def search(self, start, end, max_path_len=math.inf, backward=False):
+        minimize_ele = max_path_len < math.inf
 
         prev = {}
         dist = {}
-        weight = defaultdict(lambda: inf) # The weight of the current minimum-weight path to a node
+        weight = defaultdict(lambda: math.inf) # The weight of the current minimum-weight path to a node
         ele_diff = {}
         visited = set()
         priority_queue = heapdict()

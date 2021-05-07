@@ -1,6 +1,3 @@
-import osmnx
-import math
-
 from backend.timeout import timeout
 from backend.search_algorithms.search_algorithm import SearchAlgorithm
 from backend.graph_providers.graph_provider import GraphProvider
@@ -54,24 +51,25 @@ class PathFinder:
 
     @timeout(80)
     def find_path(self, request):
-
         graph_provider = self.graph_provider_cls(request.start_coords, request.end_coords)
+        start = graph_provider.start
+        end = graph_provider.end
 
         # Compute shortest path
         shortest_path_algo = self.shortest_path_cls(graph_provider)
-        shortest_res = shortest_path_algo.search(graph_provider.start, graph_provider.end)
+        shortest_res = shortest_path_algo.search(start, end)
 
         # Compute path with desired quality
         res = shortest_res
         max_path_len = shortest_res.path_len * request.distance_percent / 100
         if request.ele_setting == 'minimal':
             min_ele_algo = self.min_ele_cls(graph_provider)
-            alt_res = min_ele_algo.search(graph_provider.start, graph_provider.end, max_path_len, use_elevation=True)
+            alt_res = min_ele_algo.search(start, end, max_path_len)
             if alt_res.ele_gain < res.ele_gain:
                 res = alt_res
         elif request.ele_setting == 'maximal':
             max_ele_algo = self.max_ele_cls(graph_provider)
-            alt_res = max_ele_algo.search(graph_provider.start, graph_provider.end, max_path_len)
+            alt_res = max_ele_algo.search(start, end, max_path_len)
             if alt_res.ele_gain > res.ele_gain:
                 res = alt_res
 
