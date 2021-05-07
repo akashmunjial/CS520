@@ -1,25 +1,36 @@
-from math import inf
+import math
 from collections import defaultdict
 from heapdict import heapdict
-from backend.search_algs.search_result import SearchResult
-from backend.search_algs.search_alg import SearchAlg
+
+from backend.search_algorithms.search_result import SearchResult
+from backend.search_algorithms.search_algorithm import SearchAlgorithm
 
 '''
 Essentially follows the implementation here: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm#Using_a_priority_queue
 '''
-class Dijkstra(SearchAlg):
+class Dijkstra(SearchAlgorithm):
     def __init__(self, graph_provider):
         self.graph_provider = graph_provider
 
-    def __distance(self, node1, node2):
+    def _distance(self, node1, node2):
         return self.graph_provider.get_edge_distance(node1, node2)
 
-    def __elevation(self, node):
+    def _elevation(self, node):
         return self.graph_provider.get_coords(node)['z']
 
     def single_source(self, start):
+        """One line sumamry.
+
+        Some more stuff.
+
+        Args:
+            start: The start node (its integer id).
+
+        Returns:
+            A dict mapping stuff.
+        """
         prev = defaultdict(lambda: None)
-        dist = defaultdict(lambda: inf) # The weight of the current minimum-weight path to a node
+        dist = defaultdict(lambda: math.inf) # The weight of the current minimum-weight path to a node
         ele_diff = {}
         visited = set()
         priority_queue = heapdict()
@@ -35,8 +46,8 @@ class Dijkstra(SearchAlg):
             for n in neighbors:
                 if n in visited:
                     continue
-                alt_path_dist = dist[curr_node] + self.__distance(curr_node, n)
-                curr_ele_diff = self.__elevation(n) - self.__elevation(curr_node)
+                alt_path_dist = dist[curr_node] + self._distance(curr_node, n)
+                curr_ele_diff = self._elevation(n) - self._elevation(curr_node)
                 if alt_path_dist < dist[n]:
                     ele_diff[n] = curr_ele_diff
                     dist[n] = alt_path_dist
@@ -51,19 +62,18 @@ class Dijkstra(SearchAlg):
 
         return result
 
-    def search(self, start, end, max_path_len=inf, minimize_ele=False, backward=False):
-        if minimize_ele:
-            assert max_path_len != inf, "If we want to use elevation data, we need a finite maximum path length we cannot exceed"
+    def search(self, start, end, max_path_len=math.inf, backward=False):
+        minimize_ele = max_path_len < math.inf
 
         prev = {}
         dist = {}
-        weight = defaultdict(lambda: inf) # The weight of the current minimum-weight path to a node
+        weight = defaultdict(lambda: math.inf) # The weight of the current minimum-weight path to a node
         ele_diff = {}
         visited = set()
         priority_queue = heapdict()
 
-        ele_start = self.__elevation(start)
-        ele_end = self.__elevation(end)
+        ele_start = self._elevation(start)
+        ele_end = self._elevation(end)
 
         prev[start] = None
         dist[start] = 0.
@@ -100,9 +110,9 @@ class Dijkstra(SearchAlg):
                 if n in visited:
                     continue
 
-                alt_path_dist = dist[curr_node] + self.__distance(curr_node, n)
-                ele_n = self.__elevation(n)
-                curr_ele_diff = ele_n - self.__elevation(curr_node)
+                alt_path_dist = dist[curr_node] + self._distance(curr_node, n)
+                ele_n = self._elevation(n)
+                curr_ele_diff = ele_n - self._elevation(curr_node)
                 if minimize_ele:
                     heuristic_weight = max([0., curr_ele_diff])
                     alt_path_weight = curr_weight + heuristic_weight

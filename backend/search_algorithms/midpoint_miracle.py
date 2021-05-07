@@ -1,21 +1,21 @@
-from math import inf
+import math
 
-from backend.search_algs.dijkstra import Dijkstra
-from backend.search_algs.search_result import SearchResult
-from backend.search_algs.search_alg import SearchAlg
+from backend.search_algorithms.dijkstra import Dijkstra
+from backend.search_algorithms.search_result import SearchResult
+from backend.search_algorithms.search_algorithm import SearchAlgorithm
 
 SS_NOT_COMPUTED_MSG = "We have not computed the single source data yet."
 
-class MidpointMiracle(SearchAlg):
+class MidpointMiracle(SearchAlgorithm):
 
     def __init__(self, graph_provider):
         self.graph_provider = graph_provider
         self._single_source_data = None
 
-    def __elevation(self, node):
+    def _elevation(self, node):
         return self.graph_provider.get_coords(node)['z']
 
-    def __compute_single_source_data(self, start, end):
+    def _compute_single_source_data(self, start, end):
         single_source_data = {}
         dijkstra = Dijkstra(self.graph_provider)
         single_source_data['start'] = dijkstra.single_source(start)
@@ -23,14 +23,14 @@ class MidpointMiracle(SearchAlg):
 
         self._single_source_data = single_source_data
 
-    def __filter_func_factory(self, start, end, max_path_len):
+    def _filter_func_factory(self, start, end, max_path_len):
         assert self._single_source_data is not None, SS_NOT_COMPUTED_MSG
-        ele_start = self.__elevation(start)
-        ele_end = self.__elevation(end)
+        ele_start = self._elevation(start)
+        ele_end = self._elevation(end)
 
         min_of_start_and_end = min([ele_start, ele_end])
         def dips_below_min(node):
-            return self.__elevation(node) < min_of_start_and_end
+            return self._elevation(node) < min_of_start_and_end
 
         dists_from_start = self._single_source_data['start']['dist']
         dists_to_end = self._single_source_data['end']['dist']
@@ -44,19 +44,19 @@ class MidpointMiracle(SearchAlg):
                 return False
 
             # Check that there is at least a hope of elevation gain here
-            if not dips_below_min(node) and self.__elevation(node) < ele_start:
+            if not dips_below_min(node) and self._elevation(node) < ele_start:
                 return False
 
             return True
 
         return filter_func
 
-    def __sort_func_factory(self, start, end):
-        ele_start = self.__elevation(start)
-        ele_end = self.__elevation(end)
+    def _sort_func_factory(self, start, end):
+        ele_start = self._elevation(start)
+        ele_end = self._elevation(end)
 
         def sort_func(node):
-            node_ele = self.__elevation(node)
+            node_ele = self._elevation(node)
             potential_gain_prefix = max([0., node_ele - ele_start])
             potential_gain_suffix = max([0., ele_end - node_ele])
             #if node_ele < ele_start:
@@ -71,7 +71,7 @@ class MidpointMiracle(SearchAlg):
 
         return sort_func
 
-    def __merge_results(self, res_to_node, res_to_end):
+    def _merge_results(self, res_to_node, res_to_end):
         path_to_node = res_to_node['path']
         path_to_end = res_to_end['path']
 
@@ -108,7 +108,7 @@ class MidpointMiracle(SearchAlg):
             ele_gain=res_to_node['ele_gain'] + res_to_end['ele_gain'] - sub_from_gain
         )
 
-    def __reconstruct_result(self, end, ss_result, backward=False):
+    def _reconstruct_result(self, end, ss_result, backward=False):
             prev = ss_result['prev']
             ele_diff = ss_result['ele_diff']
             dist = ss_result['dist']
@@ -150,7 +150,7 @@ class MidpointMiracle(SearchAlg):
 
             return result
 
-    def __select_and_prune(self, sorted_candidates, keep_n, prune_depth):
+    def _select_and_prune(self, sorted_candidates, keep_n, prune_depth):
         # Keep just a few of the potential midpoints, and each time we select
         # a midpoint, prune away it's neighbors so we get more diverse points
         selected_midpoints = []
@@ -170,35 +170,34 @@ class MidpointMiracle(SearchAlg):
                 sorted_candidates = [node for node in sorted_candidates if node not in neighbors]
         return selected_midpoints
 
-    def __obtain_full_result(self, midpoint):
+    def _obtain_full_result(self, midpoint):
         assert self._single_source_data is not None, SS_NOT_COMPUTED_MSG
         ss_start = self._single_source_data['start']
         ss_end = self._single_source_data['end']
 
-        res_to_midpoint = self.__reconstruct_result(midpoint, ss_start, backward=False)
-        res_to_end = self.__reconstruct_result(midpoint, ss_end, backward=True)
-        merged = self.__merge_results(res_to_midpoint, res_to_end)
+        res_to_midpoint = self._reconstruct_result(midpoint, ss_start, backward=False)
+        res_to_end = self._reconstruct_result(midpoint, ss_end, backward=True)
+        merged = self._merge_results(res_to_midpoint, res_to_end)
 
         return merged
 
     def search(self, start, end, max_path_len, keep_n=10, prune_depth=3):
-        self.__compute_single_source_data(start, end)
+        self._compute_single_source_data(start, end)
 
-        filter_func = self.__filter_func_factory(start, end, max_path_len)
+        filter_func = self._filter_func_factory(start, end, max_path_len)
         midpoint_candidates = filter(filter_func, self.graph_provider.get_all_nodes())
 
-        sort_func = self.__sort_func_factory(start, end)
+        sort_func = self._sort_func_factory(start, end)
         sorted_candidates = sorted(midpoint_candidates, key=sort_func, reverse=True)
 
-        selected_midpoints = self.__select_and_prune(sorted_candidates, keep_n, prune_depth)
+        selected_midpoints = self._select_and_prune(sorted_candidates, keep_n, prune_depth)
 
-        results = [self.__obtain_full_result(midpoint) for midpoint in selected_midpoints]
+        results = [self._obtain_full_result(midpoint) for midpoint in selected_midpoints]
 
-        best_res = SearchResult(path=[], path_len=inf, ele_gain=-inf)
+        best_res = SearchResult(path=[], path_len=math.inf, ele_gain=-math.inf)
         for r in results:
             if r.ele_gain > best_res.ele_gain:
                 best_res = r
-        #best_result = max(results, key=lambda r: r.ele_gain)
 
         return best_res
 

@@ -1,8 +1,9 @@
 import osmnx
 import networkx as nx
 from collections import defaultdict
-from backend.keys import api_key
 import math
+
+from backend.keys import api_key
 from backend.graph_providers.graph_provider import GraphProvider
 
 # Side length of chunk in degrees
@@ -18,16 +19,16 @@ cache = {
 
 class LoadingGraphProvider(GraphProvider):
     def __init__(self, origin_coords, destination_coords):
-        self.start = self.find_node_near(origin_coords)
-        self.end = self.find_node_near(destination_coords)
+        self.start = self._find_node_near(origin_coords)
+        self.end = self._find_node_near(destination_coords)
 
-    def find_node_near(self, coords):
+    def _find_node_near(self, coords):
         # Load a 3x3 chunk square around the specified (lat, lng) coordinates
         x = coords[1]
         y = coords[0]
         chunk_x = math.floor(x / CHUNK_SIZE) * CHUNK_SIZE
         chunk_y = math.floor(y / CHUNK_SIZE) * CHUNK_SIZE
-        self.load_chunk(chunk_x - CHUNK_SIZE, chunk_y - CHUNK_SIZE, 3, 3)
+        self._load_chunk(chunk_x - CHUNK_SIZE, chunk_y - CHUNK_SIZE, 3, 3)
         # Once the chunks are loaded, then the nearest node can be calculated
         return osmnx.distance.get_nearest_node(cache['graph'], coords, method='euclidean')
 
@@ -44,7 +45,7 @@ class LoadingGraphProvider(GraphProvider):
             cx = math.floor(coords['x'] / CHUNK_SIZE) * CHUNK_SIZE
             cy = math.floor(coords['y'] / CHUNK_SIZE) * CHUNK_SIZE
             if not self.is_chunk_loaded(cx, cy):
-                self.load_chunk(cx, cy)
+                self._load_chunk(cx, cy)
         return neighbors
 
     # Compute Euclidian distance between two nodes
@@ -71,7 +72,7 @@ class LoadingGraphProvider(GraphProvider):
             'z': node_data['elevation']
         }
 
-    def load_chunk(self, x, y, w = 1, h = 1):
+    def _load_chunk(self, x, y, w = 1, h = 1):
         # Don't do anything if the chunks are already loaded
         if self.is_chunk_loaded(x, y, w, h):
             return

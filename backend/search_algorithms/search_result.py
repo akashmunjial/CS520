@@ -1,5 +1,3 @@
-import math
-
 class SearchResult(object):
     def __init__(self, path=[], path_len=0, ele_gain=0):
         self.path = path

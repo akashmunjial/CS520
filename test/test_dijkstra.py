@@ -1,5 +1,5 @@
 from play_graph_provider import PlayProvider
-from backend.search_algs.dijkstra import Dijkstra
+from backend.search_algorithms.dijkstra import Dijkstra
 
 
 def build_chokepoint_graph_provider():

@@ -1,5 +1,5 @@
 from play_graph_provider import PlayProvider
-from backend.search_algs.midpoint_miracle import MidpointMiracle
+from backend.search_algorithms.midpoint_miracle import MidpointMiracle
 
 
 def build_downhill_best_graph_provider():

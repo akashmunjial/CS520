@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class GraphProvider(ABC):
     @abstractmethod
     def get_neighbors(self, node):
