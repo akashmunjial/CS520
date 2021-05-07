@@ -13,8 +13,6 @@ def serve_frontend():
 
 app.register_blueprint(routes)
 
-print('DONE!')
-
 # Set debug mode to false if user specifies --prod flag
 dev_mode = len(sys.argv) < 2 or sys.argv[1] != '--prod'
 

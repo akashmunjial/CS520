@@ -16,7 +16,6 @@ def get_path(ori, dest, dist, ele, grph):
         start_coords = tuple(float(x) for x in ori[1:-1].split(', '))
         end_coords = tuple(float(x) for x in dest[1:-1].split(', '))
     except ValueError:
-        print('User did not select origin and/or destination')
         return { 'error': 'badcoords' }
 
     # Choose graph type

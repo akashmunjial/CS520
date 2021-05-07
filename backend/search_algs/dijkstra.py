@@ -116,5 +116,4 @@ class Dijkstra:
                         prev[n] = curr_node
                         priority_queue[n] = weight[n]
 
-        print("No path found")
         return SearchResult()
