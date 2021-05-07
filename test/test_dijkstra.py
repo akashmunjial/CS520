@@ -56,9 +56,7 @@ def test_min_ele_gets_stuck():
     assert shortest_res.path_len == 100
 
     expected_path = []
-    result = dijkstra.search(
-                        1, 6, minimize_ele=True,
-                        max_path_len=1.5*shortest_res.path_len)
+    result = dijkstra.search(1, 6, max_path_len=1.5*shortest_res.path_len)
     # The point is that we will not find a path here, even though there
     # is a lower-elevation path within max_path_len
     assert result.path == expected_path
@@ -70,7 +68,5 @@ def test_min_ele_succeeds_backward():
     shortest_res = dijkstra.search(1, 6)
 
     expected_path = [6,5,3,1]
-    result = dijkstra.search(
-                        6, 1, minimize_ele=True,
-                        max_path_len=1.5*shortest_res.path_len)
+    result = dijkstra.search(6, 1, max_path_len=1.5*shortest_res.path_len)
     assert result.path == expected_path
