@@ -2,10 +2,11 @@ from math import inf
 
 from backend.search_algs.dijkstra import Dijkstra
 from backend.search_algs.search_result import SearchResult
+from backend.search_algs.search_alg import SearchAlg
 
 SS_NOT_COMPUTED_MSG = "We have not computed the single source data yet."
 
-class MidpointMiracle:
+class MidpointMiracle(SearchAlg):
 
     def __init__(self, graph_provider):
         self.graph_provider = graph_provider
