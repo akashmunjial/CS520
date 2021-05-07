@@ -8,13 +8,15 @@ from backend.graph_providers.graph_provider import GraphProvider
 # Side length of chunk in degrees
 CHUNK_SIZE = 0.01
 
-class LoadingGraphProvider(GraphProvider):
-    # The keys to the loaded_chunks dict are given as integers in units of CHUNK_SIZE
-    # (e.g. if CHUNK_SIZE=0.01, then the bool describing whether chunk with...
-    # ...northeast corner (12deg, 12deg) would be stored in loaded_chunks[1200][1200])
-    loaded_chunks = defaultdict(lambda: defaultdict(lambda: False))
-    graph = nx.MultiDiGraph()
+# The keys to the loaded_chunks dict are given as integers in units of CHUNK_SIZE
+# (e.g. if CHUNK_SIZE=0.01, then the bool describing whether chunk with...
+# ...northeast corner (12deg, 12deg) would be stored in loaded_chunks[1200][1200])
+cache = {
+    'loaded_chunks': defaultdict(lambda: defaultdict(lambda: False)),
+    'graph': nx.MultiDiGraph()
+}
 
+class LoadingGraphProvider(GraphProvider):
     def __init__(self, origin_coords, destination_coords):
         self.start = self.find_node_near(origin_coords)
         self.end = self.find_node_near(destination_coords)
@@ -27,18 +29,18 @@ class LoadingGraphProvider(GraphProvider):
         chunk_y = math.floor(y / CHUNK_SIZE) * CHUNK_SIZE
         self.load_chunk(chunk_x - CHUNK_SIZE, chunk_y - CHUNK_SIZE, 3, 3)
         # Once the chunks are loaded, then the nearest node can be calculated
-        return osmnx.distance.get_nearest_node(self.graph, coords, method='euclidean')
+        return osmnx.distance.get_nearest_node(cache['graph'], coords, method='euclidean')
 
     def get_all_nodes(self):
-        return self.graph.nodes
+        return cache['graph'].nodes
 
     # Lazily loads chunks before returning neighbors of a node
     def get_neighbors(self, node):
-        neighbors = list(self.graph.neighbors(node))
+        neighbors = list(cache['graph'].neighbors(node))
         # If any of the node's neighbors fall outside the loaded chunks...
         # ...then load the chunk they belong to first
         for neighbor in neighbors:
-            coords = self.graph.nodes[neighbor]
+            coords = cache['graph'].nodes[neighbor]
             cx = math.floor(coords['x'] / CHUNK_SIZE) * CHUNK_SIZE
             cy = math.floor(coords['y'] / CHUNK_SIZE) * CHUNK_SIZE
             if not self.is_chunk_loaded(cx, cy):
@@ -58,11 +60,11 @@ class LoadingGraphProvider(GraphProvider):
 
     # Compute actual distance between two adjacent nodes
     def get_edge_distance(self, n1, n2):
-        return self.graph.get_edge_data(n1, n2)[0]['length']
+        return cache['graph'].get_edge_data(n1, n2)[0]['length']
 
     # Get x, y, and z coordinates from a node id
     def get_coords(self, node):
-        node_data = self.graph.nodes[node]
+        node_data = cache['graph'].nodes[node]
         return {
             'x': node_data['x'],
             'y': node_data['y'],
@@ -70,6 +72,9 @@ class LoadingGraphProvider(GraphProvider):
         }
 
     def load_chunk(self, x, y, w = 1, h = 1):
+        # Don't do anything if the chunks are already loaded
+        if self.is_chunk_loaded(x, y, w, h):
+            return
         # Get the northwest corner of the chunk
         x1 = math.floor(x / CHUNK_SIZE) * CHUNK_SIZE
         y1 = math.floor(y / CHUNK_SIZE) * CHUNK_SIZE
@@ -82,7 +87,7 @@ class LoadingGraphProvider(GraphProvider):
         # Add elevation data to the loaded chunk
         osmnx.elevation.add_node_elevations(subgraph, api_key)
         # Merge the loaded chunk into the current graph
-        self.graph = compose(self.graph, subgraph)
+        cache['graph'] = compose(cache['graph'], subgraph)
         # Mark all the chunks as loaded
         for i in range(w):
             for j in range(h):
@@ -90,13 +95,17 @@ class LoadingGraphProvider(GraphProvider):
 
     # Helper methods for checking whether a chunk is loaded and marking it as loaded
 
-    def is_chunk_loaded(self, x, y):
+    def is_chunk_loaded(self, x, y, w = 1, h = 1):
         cx = math.floor(x / CHUNK_SIZE)
         cy = math.floor(y / CHUNK_SIZE)
-        return self.loaded_chunks[cx][cy]
+        for i in range(w):
+            for j in range(h):
+                if not cache['loaded_chunks'][cx + i][cy + j]:
+                    return False
+        return True
 
     def set_chunk_loaded(self, x, y):
         cx = math.floor(x / CHUNK_SIZE)
         cy = math.floor(y / CHUNK_SIZE)
-        self.loaded_chunks[cx][cy] = True
+        cache['loaded_chunks'][cx][cy] = True
 
