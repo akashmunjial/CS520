@@ -2,11 +2,12 @@ from math import inf
 from collections import defaultdict
 from heapdict import heapdict
 from backend.search_algs.search_result import SearchResult
+from backend.search_algs.search_alg import SearchAlg
 
 '''
 Essentially follows the implementation here: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm#Using_a_priority_queue
 '''
-class Dijkstra:
+class Dijkstra(SearchAlg):
     def __init__(self, graph_provider):
         self.graph_provider = graph_provider
 
@@ -50,7 +51,7 @@ class Dijkstra:
 
         return result
 
-    def search(self, start, end, minimize_ele=False, max_path_len=inf, backward=False):
+    def search(self, start, end, max_path_len=inf, minimize_ele=False, backward=False):
         if minimize_ele:
             assert max_path_len != inf, "If we want to use elevation data, we need a finite maximum path length we cannot exceed"
 

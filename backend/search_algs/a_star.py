@@ -5,8 +5,9 @@ from backend.keys import api_key
 from backend.search_algs.utils.node_data import NodeData
 from backend.search_algs.utils.node_id_wrapper import NodeIdWrapper, NodeIdWrapperFactory
 from backend.search_algs.search_result import SearchResult
+from backend.search_algs.search_alg import SearchAlg
 
-class AStar:
+class AStar(SearchAlg):
     def __init__(self, graph):
         self.graph = graph
         
