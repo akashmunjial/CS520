@@ -3,7 +3,7 @@ import networkx as nx
 from collections import defaultdict
 from backend.keys import api_key
 import math
-from backend.graph_provider import GraphProvider
+from backend.graph_providers.graph_provider import GraphProvider
 
 CHUNK_SIZE = 0.01
 
@@ -22,6 +22,9 @@ class LoadingGraphProvider(GraphProvider):
         chunk_y = math.floor(y / CHUNK_SIZE) * CHUNK_SIZE
         self.load_chunk(chunk_x - CHUNK_SIZE, chunk_y - CHUNK_SIZE, 3, 3)
         return osmnx.distance.get_nearest_node(self.graph, (y, x), method='euclidean')
+
+    def get_all_nodes(self):
+        return self.graph.nodes
 
     def get_neighbors(self, node):
         neighbors = list(self.graph.neighbors(node))
@@ -75,3 +78,4 @@ class LoadingGraphProvider(GraphProvider):
         cx = math.floor(x / CHUNK_SIZE)
         cy = math.floor(y / CHUNK_SIZE)
         self.loaded_chunks[cx][cy] = True
+

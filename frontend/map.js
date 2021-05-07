@@ -49,12 +49,14 @@ search_submit.addEventListener('click', function() {
 // The names are self-explanatory
 // It also instantiates dummy polyline so it can be replaced later
 
-var polyline_route = L.polyline([0,0][0,0]);
+var new_route = L.polyline([0,0][0,0]);
+var short_route = L.polyline([0,0][0,0]);
 
 function send_route_request() {
   console.log('Sending route request...');
   // Immediately erase existing route
-  polyline_route.remove();
+  new_route.remove();
+  short_route.remove();
   let request = new XMLHttpRequest();
   // Set the callback function once the route is loaded
   request.onreadystatechange = function() {
@@ -74,7 +76,13 @@ const stats = document.querySelector('#stats');
 
 function update_map_route(response) {
   let obj = JSON.parse(response);
-  if(obj.route.length === 0) {
+  if (obj.error === 'timeout') {
+    alert('Timed out while looking for path');
+    console.log('Timed out');
+  } else if (obj.error === 'badcoords') {
+    alert('Please select both an origin and a destination');
+    console.log('Missing coords');
+  } else if(obj.route.length === 0) {
     alert('No path found');
     console.log('No path found');
   } else {
@@ -82,15 +90,23 @@ function update_map_route(response) {
     // Pan to the center of the origin and destination
     map.panTo(new L.LatLng((obj.route[obj.route.length-1][0] + obj.route[0][0]) / 2, 
                           (obj.route[obj.route.length-1][1] + obj.route[0][1]) / 2));
-    polyline_route = L.polyline(obj.route, color='#ff0000');
-    polyline_route.setStyle({color:'red'});
-    polyline_route.addTo(map);
+    short_route = L.polyline(obj.short_route);
+    short_route.setStyle({color:'blue'});
+    short_route.addTo(map);
+    new_route = L.polyline(obj.route);
+    new_route.setStyle({color:'red'});
+    new_route.addTo(map);
     console.log('Done.');
     // Print stats
-    pretty_stats =    '        Shortest path length: ' + obj.stats[0] + 'm\r\n'
-                    + 'Shortest path elevation gain: ' + obj.stats[1] + 'm\r\n'
-                    + '             New path length: ' + obj.stats[2] + 'm\r\n'
-                    + '     New path elevation gain: ' + obj.stats[3] + 'm';
+    if(obj.stats[2]==-1 && obj.stats[3]==-1) {
+      pretty_stats =    '        Shortest path length: ' + obj.stats[0] + 'm\r\n'
+                      + 'Shortest path elevation gain: ' + obj.stats[1] + 'm';
+    } else {
+      pretty_stats =    '        Shortest path length: ' + obj.stats[0] + 'm\r\n'
+                      + 'Shortest path elevation gain: ' + obj.stats[1] + 'm\r\n'
+                      + '             New path length: ' + obj.stats[2] + 'm\r\n'
+                      + '     New path elevation gain: ' + obj.stats[3] + 'm';
+    }
     stats.textContent = pretty_stats;
     stats.style.visibility = 'visible';
   }

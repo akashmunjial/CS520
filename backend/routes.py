@@ -1,10 +1,11 @@
 from flask import Blueprint, request, jsonify
 import osmnx
-from backend.router import get_route
+from backend.get_path import get_path
+import json
 
-dummy_route = Blueprint('dummy_route', __name__, template_folder='templates')
+routes = Blueprint('routes', __name__, template_folder='frontend')
 
-@dummy_route.route('/api', methods = ['POST'])
+@routes.route('/api', methods = ['POST'])
 def route():
 
     # Get request data
@@ -15,10 +16,13 @@ def route():
     graph = request.form['graph']
 
     # Get recomended route
-    route, stats = get_route(origin, destination, distance, elevation, graph)
-    return jsonify(route=route, stats=stats)
+    results = get_path(origin, destination, distance, elevation, graph)
+    if results == None:
+        return jsonify(error="timeout")
+    else:
+        return jsonify(results)
 
-@dummy_route.route('/search', methods = ['POST'])
+@routes.route('/search', methods = ['POST'])
 def search():
     
     # Get request data
