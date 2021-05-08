@@ -24,20 +24,26 @@ def route():
 
     path_request = PathRequest(origin, destination, distance_percent, ele_setting, graph_setting)
 
-    shortest_path_cls = AStar
-    max_ele_cls = MidpointMiracle
-    min_ele_cls = AStar
-    if(graph_setting == 'bounded'):
+    # Get graph provider
+    if(path_request.graph_setting == 'bounded'):
         graph_provider_cls = BoundedGraphProvider
     else:
         graph_provider_cls = LoadingGraphProvider
+    graph_provider = graph_provider_cls(path_request.start_coords, path_request.end_coords)
+
+    # Get shortest path algorithm
+    shortest_path_algo = AStar(graph_provider)
+
+    # Get elevation-based search algorithm
+    if path_request.ele_setting == 'minimal':
+        ele_search_algo = AStar(graph_provider)
+    elif path_request.ele_setting == 'maximal':
+        ele_search_algo = MidpointMiracle(graph_provider)
+    else:
+        ele_search_algo = None
 
     # Get recomended route
-    finder = PathFinder(
-            shortest_path_cls,
-            max_ele_cls,
-            min_ele_cls,
-            graph_provider_cls)
+    finder = PathFinder(shortest_path_algo, ele_search_algo, graph_provider)
     results = finder.find_path(path_request)
     if results == None:
         return jsonify(error="timeout")
