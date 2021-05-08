@@ -1,4 +1,4 @@
-"""Contains a class orchestrating several modules to do work of finding paths.
+"""Contains a class orchestrating several modules to do the work of finding paths.
 """
 from backend.timeout import timeout
 from backend.path_request import PathRequest
@@ -13,8 +13,8 @@ class PathFinder:
         shortest_path_algo: A SearchAlgorithm for finding the shortest path.
         ele_search_algo: None, if we only want shortest path, or else a
             SearchAlgorithm for performing an elevation-based search.
-        graph_provider: A GraphProvider, which we need for the endpoints and
-            to be able to return paths as coordinate lists.
+        graph_provider: A GraphProvider, which we need to access the endpoints
+            and to be able to return paths as coordinate lists.
     """
     def __init__(self, shortest_path_algo, ele_search_algo, graph_provider):
         """Initializes a PathFinder, with input validation inside setters.
@@ -58,9 +58,9 @@ class PathFinder:
         """Perform the work to obtain desired paths based on a request.
 
         Utilizes the graph provider and search algorithms to obtain the shortest
-        path and, if an appropriate algorithm was provided, an elevation-based.
-        path. Uses our timeout wrapper with a fixed timeout to avoid endlessly
-        searching.
+        path and, if an appropriate algorithm was provided, an elevation-based
+        path. Wrapped in our timeout wrapper with a fixed timeout to avoid
+        endlessly searching.
 
         Args:
             request: A PathRequest specifying nature of desired path.

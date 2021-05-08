@@ -27,7 +27,7 @@ author = 'Alexander Hulbert, Aidan Greenslade, Dylan Finkbeiner, Matthew Xu, Aka
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinxcontrib.napoleon',
+extensions = ['sphinxcontrib.napoleon', 'sphinx.ext.autodoc'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -38,7 +38,7 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
-
+autodoc_default_options = {     "members": True,     "undoc-members": True,     "private-members": True  }
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
