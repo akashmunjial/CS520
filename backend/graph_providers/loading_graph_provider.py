@@ -18,6 +18,13 @@ cache = {
 }
 
 class LoadingGraphProvider(GraphProvider):
+    """Graph provider implementation that lazily loads sections of the world map.
+
+    Attributes:
+        start: the id of the node closest to the origin
+        end: the id of the node closest to the destination
+    """
+
     def __init__(self, origin_coords, destination_coords):
         self.start = self._find_node_near(origin_coords)
         self.end = self._find_node_near(destination_coords)
@@ -34,9 +41,20 @@ class LoadingGraphProvider(GraphProvider):
 
     def get_all_nodes(self):
         return cache['graph'].nodes
-
-    # Lazily loads chunks before returning neighbors of a node
+    
     def get_neighbors(self, node):
+        """Lazily load necessary chunks before returning neighbors of a node
+
+        If the passed node has neighbors which are outside the currently loaded portion
+        of the map, this function will load the chunks they're in.
+
+        Args:
+            node: the id of the node to get the neighbors of
+
+        Returns:
+            The neighbors of the passed node.
+
+        """
         neighbors = list(cache['graph'].neighbors(node))
         # If any of the node's neighbors fall outside the loaded chunks...
         # ...then load the chunk they belong to first
@@ -44,12 +62,23 @@ class LoadingGraphProvider(GraphProvider):
             coords = cache['graph'].nodes[neighbor]
             cx = math.floor(coords['x'] / CHUNK_SIZE) * CHUNK_SIZE
             cy = math.floor(coords['y'] / CHUNK_SIZE) * CHUNK_SIZE
-            if not self.is_chunk_loaded(cx, cy):
+            if not self._is_chunk_loaded(cx, cy):
                 self._load_chunk(cx, cy)
         return neighbors
 
-    # Compute Euclidian distance between two nodes
     def get_distance_estimate(self, n1, n2):
+        """Estimate the distance between any two nodes, no edge necessary.
+
+        This is useful as a heuristic. Using simple trigonometry, it 
+        calculates the distance as the crow flies.
+
+        Args:
+            n1: The first node (its integer id).
+            n1: The second node (its integer id).
+
+        Returns:
+            The estimated distance between the nodes expressed as a number.
+        """
         p1 = self.get_coords(n1)
         p2 = self.get_coords(n2)
         # d = sqrt((x - x')^2 + (y - y')^2 + (z - z')^2)
@@ -73,8 +102,16 @@ class LoadingGraphProvider(GraphProvider):
         }
 
     def _load_chunk(self, x, y, w = 1, h = 1):
+        """Download the map associated with the chunk at (x, y) and merge it into cache['graph']
+
+        Args:
+            x: The longitude of the chunk to load
+            y: The latitude of the chunk to load
+            w: The width (in chunks) to load
+            h: The height (in chunks) to load
+        """
         # Don't do anything if the chunks are already loaded
-        if self.is_chunk_loaded(x, y, w, h):
+        if self._is_chunk_loaded(x, y, w, h):
             return
         # Get the northwest corner of the chunk
         x1 = math.floor(x / CHUNK_SIZE) * CHUNK_SIZE
@@ -92,11 +129,22 @@ class LoadingGraphProvider(GraphProvider):
         # Mark all the chunks as loaded
         for i in range(w):
             for j in range(h):
-                self.set_chunk_loaded(x1 + CHUNK_SIZE * i, y1 + CHUNK_SIZE * j)
+                self._set_chunk_loaded(x1 + CHUNK_SIZE * i, y1 + CHUNK_SIZE * j)
 
     # Helper methods for checking whether a chunk is loaded and marking it as loaded
 
-    def is_chunk_loaded(self, x, y, w = 1, h = 1):
+    def _is_chunk_loaded(self, x, y, w = 1, h = 1):
+        """Check whether a given area is loaded
+
+        Args:
+            x: The longitude of the chunk to check
+            y: The latitude of the chunk to check
+            w: The width (in chunks) to check
+            h: The height (in chunks) to check
+
+        Returns:
+            True if all the chunks in the specified area are loaded
+        """
         cx = math.floor(x / CHUNK_SIZE)
         cy = math.floor(y / CHUNK_SIZE)
         for i in range(w):
@@ -105,7 +153,8 @@ class LoadingGraphProvider(GraphProvider):
                     return False
         return True
 
-    def set_chunk_loaded(self, x, y):
+    def _set_chunk_loaded(self, x, y):
+        """Marks the chunk at (x, y) as loaded"""
         cx = math.floor(x / CHUNK_SIZE)
         cy = math.floor(y / CHUNK_SIZE)
         cache['loaded_chunks'][cx][cy] = True
