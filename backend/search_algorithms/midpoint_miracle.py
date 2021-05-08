@@ -1,3 +1,5 @@
+"""Contains a class used for finding an elevation-maximizing path.
+"""
 import math
 
 from backend.search_algorithms.dijkstra import Dijkstra
@@ -11,9 +13,9 @@ class MidpointMiracle(SearchAlgorithm):
 
     Simply put, this algorithm searches for an elevation-maximizing path by
     reducing the problem to one of finding an especially good intermediate
-    node to have along the path from 'start' to 'end'. We refer to an
-    intermediate node as a 'midpoint', though it need not be equidistant from
-    'start' and 'end'.
+    node to have along the path from the start node to the end node.
+    We refer to an intermediate node as a 'midpoint', though it need not be
+    equidistant from the start and end nodes.
 
     Attributes:
         graph_provider: A GraphProvider to facilitate the search.
@@ -100,14 +102,14 @@ class MidpointMiracle(SearchAlgorithm):
             if node == start or node == end:
                 return False
 
-            # Filter out nodes for whom full path through that node (using
+            # Filter out nodes for which full path through that node (using
             # paths from single-source step) is longer than maximum allowed
             dist_from_start = dists_from_start[node]
             dist_to_end = dists_to_end[node]
             if dist_from_start + dist_to_end > max_path_len:
                 return False
 
-            # Check that there is at least a hope of elevation gain here
+            # Check that there is at least a hope of elevation gain
             if not dips_below_min(node) and self._elevation(node) < ele_start:
                 return False
 
@@ -177,7 +179,6 @@ class MidpointMiracle(SearchAlgorithm):
         return selected_midpoints
 
     def _reconstruct_result(self, node, ss_result, backward=False):
-    #def _reconstruct_result(self, end, ss_result, backward=False):
         """Reconstruct a path to or from a node using a single-source result.
 
         Args:
@@ -193,7 +194,7 @@ class MidpointMiracle(SearchAlgorithm):
 
         Returns:
             A dict containing the path, path length, and elevation gain
-            of the reconstructed path from the source of ss_result to node
+            of the reconstructed path from the source of 'ss_result' to node
             (or from node to source if 'backward' is True), as well as data
             needed to merge results later on.
         """
@@ -301,10 +302,13 @@ class MidpointMiracle(SearchAlgorithm):
         """Given a midpoint, reconstruct the full SearchResult via the midpoint.
 
         Args:
-            midpoint:
+            midpoint: The node for which we will obtain the full
+                SearchResult corresponding to the path from the start node
+                to the end node via this node.
 
         Returns:
-            A SearchResult
+            A SearchResult corresponding to the path from the start node to
+            the end node via 'midpoint'.
 
         Raises:
             An Exception if we have not computed the single-source data yet.
@@ -321,6 +325,22 @@ class MidpointMiracle(SearchAlgorithm):
         return merged
 
     def search(self, start, end, max_path_len, keep_n=10, prune_depth=3):
+        """Search for an elevation-maximizing path from 'start' to 'end'.
+
+        Args:
+            start: The start node of the path of interest.
+            end: The end node of the path of interest.
+            max_path_len: The maximum allowable length of a path.
+            keep_n: Optional; an integer hyperparameter of the search used in
+                the selection/pruning process. See '_select_and_prune' function.
+            prune_depth: Optional; an integer hyperparameter of the search used in
+                the selection/pruning process. See '_select_and_prune' function.
+
+        Returns:
+            A SearchResult corresponding to the best path we were able to
+            find by analyzing potential midpoints and choosing the best among
+            a small set of high-quality ones.
+        """
         self._compute_single_source_data(start, end)
 
         # Filter and sort candidate midpoints
