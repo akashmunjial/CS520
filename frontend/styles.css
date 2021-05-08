@@ -1,3 +1,9 @@
+/*
+Nothing special here.
+We did not place an emphasis on accessibility, portability or responsiveness.
+Some browsers tested did not have the 'monospace' font.
+*/
+
 body, html {
     margin: 0;
     padding: 0;

@@ -10,7 +10,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   minZoom: '0'
 }).addTo(map)
 
-// functions to pan the map to a specified location
+// Functions to pan the map to a specified location
 
 async function sendSearchRequest() {
   const resp = await fetch('/search', {

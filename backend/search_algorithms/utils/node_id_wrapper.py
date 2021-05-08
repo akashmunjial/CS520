@@ -10,23 +10,23 @@ class NodeIdWrapper(object):
         self.node_map = node_map
         self.node_id = node_id
 
-    """Function to get the NodeData object corresponding to the current node id.
-
-    Returns:
-        NodeData object corresponding to the current node id
-    """
     def get_data(self):
+        """Function to get the NodeData object corresponding to the current node id.
+
+        Returns:
+            NodeData object corresponding to the current node id
+        """
         return self.node_map[self.node_id]
 
-    """Operation override for the less than operation to compare two objects of the same type.
-
-    Args:
-        other: another object of the NodeIdWrapper time, with which current object has to be compared
-
-    Returns:
-        A boolean representing if the current node is less than the other node
-    """
     def __lt__(self, other):
+        """Operation override for the less than operation to compare two objects of the same type.
+
+        Args:
+            other: another object of the NodeIdWrapper time, with which current object has to be compared
+
+        Returns:
+            A boolean representing if the current node is less than the other node
+        """
         self_heuristic_dist = self.node_map[self.node_id].heuristic_dist
         other_heuristic_dist = other.node_map[other.node_id].heuristic_dist
         return self_heuristic_dist < other_heuristic_dist
@@ -41,13 +41,13 @@ class NodeIdWrapperFactory(object):
     def __init__(self, node_map):
         self.node_map = node_map
 
-    """Function to create the wrapper for the node ids provided
-
-    Args:
-        node_id: the node id which is to be wrapped
-
-    Returns:
-        the NodeIdWrapper object corresponding to the given node_id
-    """
     def make_wrapper(self, node_id):
+        """Function to create the wrapper for the node ids provided
+
+        Args:
+            node_id: the node id which is to be wrapped
+
+        Returns:
+            the NodeIdWrapper object corresponding to the given node_id
+        """
         return NodeIdWrapper(self.node_map, node_id)

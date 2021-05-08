@@ -6,6 +6,13 @@ from backend.keys import api_key
 
 
 class BoundedGraphProvider(GraphProvider):
+    """Abstract class declaring the required methods for all implementing subclasses.
+
+    Attributes:
+        start: The origin node.
+        end: The destination node.
+        graph: The constructed bounding-box graph.
+    """
 
     def __init__(self, start, end):
         # Get the bounding box of start/end points
@@ -34,6 +41,18 @@ class BoundedGraphProvider(GraphProvider):
 
     # Compute Euclidian distance between two nodes
     def get_distance_estimate(self, n1, n2):
+        """Estimate the distance between any two nodes, no edge necessary.
+
+        This is useful as a heuristic. Using simple trigonometry, it 
+        calculates the distance as the crow flies.
+
+        Args:
+            n1: The first node (its integer id).
+            n1: The second node (its integer id).
+
+        Returns:
+            The estimated distance between the nodes expressed as a number.
+        """
         p1 = self.get_coords(n1)
         p2 = self.get_coords(n2)
         # d = sqrt((x - x')^2 + (y - y')^2 + (z - z')^2)
