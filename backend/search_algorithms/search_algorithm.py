@@ -2,7 +2,11 @@ from abc import ABC, abstractmethod
 
 
 class SearchAlgorithm(ABC):
-    """Abstract class representing the necessary requirements for a class performing a search algorithm.
+    """Abstract class that all search algorithms must subclass.
+
+    This is the Strategy pattern 'interface' that each of the search algorithm
+    'strategies' must implement, allowing has-a relationship between PathFinder
+    and SearchAlgorithm instead of concrete search algorithms.
     """
 
     @abstractmethod
@@ -11,11 +15,11 @@ class SearchAlgorithm(ABC):
 
     @abstractmethod
     def search(self, start, end, **kwargs):
-        """The function to execute the search from some start to some end node
+        """The function to execute the search from some start to some end node.
 
         Args:
-            start: the start of the search, the source
-            end: the termination point of the search, the target
+            start: The start of the search, the source.
+            end: The termination point of the search, the target.
             **kwargs: Additional parameters that can be set such as the max_path_len etc.
         """
         pass
