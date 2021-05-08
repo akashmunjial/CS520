@@ -1,6 +1,10 @@
 # EleNa (CS 520)
 Elena Project for CS 520
 
+### Contributors
+
+Aidan Greenslade, Dylan Finkbeiner, Alexander Hulbert, Akash Munjial, Matthew Xu
+
 ## Installation And Usage
 
 1. Install required dependencies
@@ -34,3 +38,11 @@ You may need to clean up the existing compiled docs (especially if the source co
 ```
 make clean-docs
 ```
+
+## Testing
+
+To run the tests using pytest, run the following command from the top-level directory:
+```
+pytest
+```
+This will run all the tests in the test folder and produce the result.
