@@ -7,7 +7,7 @@ from backend.graph_providers.graph_provider import GraphProvider
 
 
 class PathFinder:
-    """A class orchestrating several modules to perform EleNa's path finding.
+    """Orchestrates several modules to perform EleNa's path finding.
 
     Attributes:
         shortest_path_algo: A SearchAlgorithm for finding the shortest path.
