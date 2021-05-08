@@ -107,7 +107,6 @@ class AStar(SearchAlgorithm):
                 dist = curr.actual_dist + self._distance(curr.id, n)
                 if dist <= max_path_len:
                     is_in_node_map = n in node_data_map
-
                     dist_heuristic = dist + self._distance_heuristic(n, end)
                     elevation_heuristic = curr.elevation_gain + self._elevation_heuristic(curr.id, n)
                     node_data_map[n] = NodeData(
