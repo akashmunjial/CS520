@@ -1,5 +1,7 @@
 # EleNa (CS 520)
-Elena Project for CS 520
+Elevation Navigation Web Application
+
+![Preview](preview.png)
 
 ### Contributors
 
@@ -45,4 +47,4 @@ To run the tests using pytest, run the following command from the top-level dire
 ```
 pytest
 ```
-This will run all the tests in the test folder and produce the result.
+This will run all the tests in the test folder and produce the results.
