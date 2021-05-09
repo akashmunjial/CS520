@@ -38,7 +38,10 @@ def route():
     graph_setting = request.form['graph']
 
     # Create a new path request
-    path_request = PathRequest(origin, destination, distance_percent, ele_setting, graph_setting)
+    try:
+        path_request = PathRequest(origin, destination, distance_percent, ele_setting, graph_setting)
+    except ValueError:
+        return jsonify(error="badcoords")
 
     # Get graph provider
     if(path_request.graph_setting == 'bounded'):
