@@ -17,7 +17,7 @@ pip3 install -r requirements.txt
 python3 app.py
 ```
 
-3. Access server from `http://localhost:5000`
+3. Access the app in your browser from `http://localhost:5000`
 
 ----
 

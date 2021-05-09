@@ -12,7 +12,7 @@ from backend.graph_providers.graph_provider import GraphProvider
 class Dijkstra(SearchAlgorithm):
     """The Dijkstra search algorithm, with two options for searching.
 
-    Namely, we implement the single-source shortest paths version of Dijkstra
+    We implement the single-source shortest paths version of Dijkstra
     which gets all shortest paths starting from a source, as well as the
     simpler form of Dijkstra which terminates once the path from the source
     to some target node has been found.

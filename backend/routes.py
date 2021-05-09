@@ -45,7 +45,7 @@ def route():
         graph_provider_cls = BoundedGraphProvider
     else:
         graph_provider_cls = LoadingGraphProvider
-    graph_provider = graph_provider_cls(path_request.start_coords, path_request.end_coords)
+    graph_provider = graph_provider_cls(path_request.origin, path_request.destination)
 
     # Get shortest path algorithm
     shortest_path_algo = AStar(graph_provider)
