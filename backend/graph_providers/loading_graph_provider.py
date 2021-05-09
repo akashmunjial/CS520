@@ -23,21 +23,15 @@ class LoadingGraphProvider(GraphProvider):
     Attributes:
         start: the id of the node closest to the origin
         end: the id of the node closest to the destination
+        lazy_loading_enabled: controls whether additional chunks should be automatically loaded
     """
 
     def __init__(self, origin_coords, destination_coords):
-        self.start = self._find_node_near(origin_coords)
-        self.end = self._find_node_near(destination_coords)
-
-    def _find_node_near(self, coords):
-        # Load a 3x3 chunk square around the specified (lat, lng) coordinates
-        x = coords[1]
-        y = coords[0]
-        chunk_x = math.floor(x / CHUNK_SIZE) * CHUNK_SIZE
-        chunk_y = math.floor(y / CHUNK_SIZE) * CHUNK_SIZE
-        self._load_chunk(chunk_x - CHUNK_SIZE, chunk_y - CHUNK_SIZE, 3, 3)
-        # Once the chunks are loaded, then the nearest node can be calculated
-        return osmnx.distance.get_nearest_node(cache['graph'], coords, method='euclidean')
+        initial_chunks = self._compute_initial_area(origin_coords, destination_coords)
+        self._load_chunk(initial_chunks['x'], initial_chunks['y'], initial_chunks['w'], initial_chunks['h'])
+        self.start = osmnx.distance.get_nearest_node(cache['graph'], origin_coords, method='euclidean')
+        self.end = osmnx.distance.get_nearest_node(cache['graph'], destination_coords, method='euclidean')
+        self.lazy_loading_enabled = True
 
     def get_all_nodes(self):
         return cache['graph'].nodes
@@ -56,14 +50,15 @@ class LoadingGraphProvider(GraphProvider):
 
         """
         neighbors = list(cache['graph'].neighbors(node))
-        # If any of the node's neighbors fall outside the loaded chunks...
-        # ...then load the chunk they belong to first
-        for neighbor in neighbors:
-            coords = cache['graph'].nodes[neighbor]
-            cx = math.floor(coords['x'] / CHUNK_SIZE) * CHUNK_SIZE
-            cy = math.floor(coords['y'] / CHUNK_SIZE) * CHUNK_SIZE
-            if not self._is_chunk_loaded(cx, cy):
-                self._load_chunk(cx, cy)
+        if self.lazy_loading_enabled:
+            # If any of the node's neighbors fall outside the loaded chunks...
+            # ...then load the chunk they belong to first
+            for neighbor in neighbors:
+                coords = cache['graph'].nodes[neighbor]
+                cx = math.floor(coords['x'] / CHUNK_SIZE) * CHUNK_SIZE
+                cy = math.floor(coords['y'] / CHUNK_SIZE) * CHUNK_SIZE
+                if not self._is_chunk_loaded(cx, cy):
+                    self._load_chunk(cx, cy)
         return neighbors
 
     def get_distance_estimate(self, n1, n2):
@@ -159,3 +154,20 @@ class LoadingGraphProvider(GraphProvider):
         cy = math.floor(y / CHUNK_SIZE)
         cache['loaded_chunks'][cx][cy] = True
 
+    def _compute_initial_area(self, start, end):
+        """Computes the initial bounding box to load"""
+        n = max(start[0], end[0])
+        s = min(start[0], end[0])
+        e = max(start[1], end[1])
+        w = min(start[1], end[1])
+        longer_diff = max(abs(e - w), abs(n - s))
+        chunk_n = math.ceil((n + longer_diff) / CHUNK_SIZE)
+        chunk_s = math.floor((s - longer_diff) / CHUNK_SIZE)
+        chunk_e = math.ceil((e + longer_diff) / CHUNK_SIZE)
+        chunk_w = math.floor((w - longer_diff) / CHUNK_SIZE)
+        return {
+            'x': chunk_w * CHUNK_SIZE,
+            'y': chunk_s * CHUNK_SIZE,
+            'w': chunk_e - chunk_w,
+            'h': chunk_n - chunk_s
+        }
