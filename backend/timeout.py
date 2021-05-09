@@ -3,6 +3,16 @@ from time import sleep
 from kthread import KThread
 
 def timeout(seconds):
+    """A decorator which forces the function it's decorating to return None after a specified number of seconds
+
+    Usage:
+        @timeout(10)
+        def function_that_will_return_none_after_ten_seconds():
+            ...
+
+    Args:
+        seconds: The number of seconds after which the function should return None
+    """
     def decorator(func):
         @wraps(func)
         def wrapped_func(*args, **kwargs):
@@ -24,7 +34,7 @@ def timeout(seconds):
             if thread.is_alive():
                 terminating_thread = True
                 thread.terminate()
-            # If res contains something, return it
+            # If res contains something (meaning the function completed successfully), return it
             if len(res) > 0:
                 return res[0]
             # Otherwise, return None

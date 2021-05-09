@@ -7,10 +7,10 @@ Welcome to EleNa's documentation!
 =================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 6
    :caption: Contents:
    
-   modules
+   source/modules
 
 
 
