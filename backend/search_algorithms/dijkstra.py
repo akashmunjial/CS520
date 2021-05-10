@@ -69,21 +69,21 @@ class Dijkstra(SearchAlgorithm):
             differences.
         """
         # A mapping from nodes to backpointers for reconstructing paths
-        prev = defaultdict(lambda: None)
+        self._prev = defaultdict(lambda: None)
         # The distance of the current minimum-distance path to a node
-        dist = defaultdict(lambda: math.inf)
+        self._dist = defaultdict(lambda: math.inf)
         # Map a node 'n' to the (signed) elevation diff between n and prev[n]
-        ele_diff = {}
+        self._ele_diff = {}
         visited = set()
         priority_queue = heapdict()
 
         # Disable lazy loading to prevent infinite chunks from being loaded
         self.graph_provider.lazy_loading_enabled = False
 
-        prev[start] = None
-        dist[start] = 0.
-        ele_diff[start] = 0.
-        priority_queue[start] = dist[start]
+        self._prev[start] = None
+        self._dist[start] = 0.
+        self._ele_diff[start] = 0.
+        priority_queue[start] = self._dist[start]
         while len(priority_queue) > 0:
             curr_node, curr_dist = priority_queue.popitem()
             visited.add(curr_node)
@@ -91,28 +91,68 @@ class Dijkstra(SearchAlgorithm):
             for n in neighbors:
                 if n in visited:
                     continue
-                alt_path_dist = dist[curr_node] + self._distance(curr_node, n)
+                alt_path_dist = self._dist[curr_node] + self._distance(curr_node, n)
                 curr_ele_diff = self._elevation(n) - self._elevation(curr_node)
                 # Standard Dijkstra criterion for updating path
-                if alt_path_dist < dist[n]:
-                    ele_diff[n] = curr_ele_diff
-                    dist[n] = alt_path_dist
-                    prev[n] = curr_node
-                    priority_queue[n] = dist[n]
+                if alt_path_dist < self._dist[n]:
+                    self._ele_diff[n] = curr_ele_diff
+                    self._dist[n] = alt_path_dist
+                    self._prev[n] = curr_node
+                    priority_queue[n] = self._dist[n]
 
         # Reenable lazy loading
         # This does nothing if the graph provider does not support lazy loading
         self.graph_provider.lazy_loading_enabled = True
 
         result = {
-            'prev': prev,
-            'dist': dist,
-            'ele_diff': ele_diff
+            'prev': self._prev,
+            'dist': self._dist,
+            'ele_diff': self._ele_diff
         }
 
         return result
 
-    def search(self, start, end, max_path_len=math.inf, backward=False):
+    def _reconstruct_result(self, node, end_is_source):
+        """After concluding a targeted search, reconstruct the result.
+
+        That is, follow backpointers and accumulate the elevation gain
+        accordingly.
+
+        Args:
+            node: The target node of the search.
+            end_is_source: See arg of same name on the `search` method.
+
+        Returns:
+            A SearchResult describing the path found.
+        """
+        path = [node]
+        if end_is_source:
+            # 'node' is the start point and so does not contribute to ele_gain.
+            cum_ele_diff = 0
+        else:
+            # The ele diff between 'node' (end point) and next node
+            # on the path toward the source
+            cum_ele_diff = max([0., self._ele_diff[node]])
+
+        # Follow backpointers to reconstruct path and compute statistics
+        successor = node
+        curr_node = self._prev[node]
+        while curr_node is not None:
+            path.append(curr_node)
+            if end_is_source:
+                # ele_diff's were computed moving forward toward 'node', so we
+                # must be careful to get the right contribution here
+                cum_ele_diff += max([0., -self._ele_diff[successor]])
+            else:
+                cum_ele_diff += max([0., self._ele_diff[curr_node]])
+            curr_node = self._prev[curr_node]
+            successor = curr_node
+        if not end_is_source:
+            path.reverse() # 'node' should be at final index in the list
+        path_len = self._dist[node]
+        return SearchResult(path, path_len, cum_ele_diff)
+
+    def search(self, start, end, max_path_len=math.inf, end_is_source=False):
         """Perform a targeted search from 'start' to 'end'.
 
         If max_path_len is infinity, this will be a straightforward
@@ -124,10 +164,11 @@ class Dijkstra(SearchAlgorithm):
             start: The start node of the path of interest.
             end: The end node of the path of interest.
             max_path_len: The maximum allowable length of a path.
-            backward: If True, 'end' will be the source node, but the path we
-                return will still begin with 'start' and end with 'end'. This is
-                useful for investigating whether we can get a better elevation-
-                minimizing path by starting from the end.
+            end_is_source: If True, indicates that although we want a path
+                from 'start' to 'end', we want to conduct the search by
+                beginning at 'end' and finding a path to 'start', then
+                reversing the path and computing elevation gain as if we
+                moved from 'start' to 'end'.
 
         Returns:
             A SearchResult describing the path we found, or a default
@@ -137,55 +178,41 @@ class Dijkstra(SearchAlgorithm):
         minimize_ele = max_path_len < math.inf
 
         # A mapping from nodes to backpointers for reconstructing paths
-        prev = {}
+        self._prev = {}
         # The distance of the current minimum-distance path to a node
-        dist = {}
+        self._dist = {}
         # The weight of the current minimum-weight path to a node
         weight = defaultdict(lambda: math.inf)
         # Map a node 'n' to the (signed) elevation diff between n and prev[n]
-        ele_diff = {}
+        self._ele_diff = {}
         visited = set()
         priority_queue = heapdict()
 
-        ele_start = self._elevation(start)
-        ele_end = self._elevation(end)
+        source = start if not end_is_source else end
 
-        prev[start] = None
-        dist[start] = 0.
-        weight[start] = 0.
-        ele_diff[start] = 0.
-        priority_queue[start] = weight[start]
+        self._prev[source] = None
+        self._dist[source] = 0.
+        weight[source] = 0.
+        self._ele_diff[source] = 0.
+        priority_queue[source] = weight[source]
         while len(priority_queue) > 0:
             curr_node, curr_weight = priority_queue.popitem()
 
             # When a node is visited, its values in  dist, prev, weight,
             # and ele_diff will never be updated again
             visited.add(curr_node)
-            if curr_node == end:
-                path = [end]
-                predecessor = prev[end]
-                cum_ele_diff = 0.
-                # Reconstruct the path to 'end' using backpointers
-                while predecessor is not None:
-                    path.append(predecessor)
-                    if backward:
-                        cum_ele_diff += max([0., -ele_diff[predecessor]])
-                    else:
-                        cum_ele_diff += max([0., ele_diff[predecessor]])
-                    predecessor = prev[predecessor]
-                if not backward:
-                    # Path currently starts with 'end': make begin with 'start'
-                    path.reverse()
-                path_len = dist[end]
-                return SearchResult(path, path_len, cum_ele_diff)
+            if curr_node == start and end_is_source:
+                return self._reconstruct_result(start, end_is_source=end_is_source)
+            elif curr_node == end and not end_is_source:
+                return self._reconstruct_result(end, end_is_source=end_is_source)
 
+            # Explore neighbors to see if we have a new best path to them
             neighbors = list(self.graph_provider.get_neighbors(curr_node))
-
             for i, n in enumerate(neighbors):
                 if n in visited:
                     continue
 
-                alt_path_dist = dist[curr_node] + self._distance(curr_node, n)
+                alt_path_dist = self._dist[curr_node] + self._distance(curr_node, n)
                 ele_n = self._elevation(n)
                 curr_ele_diff = ele_n - self._elevation(curr_node)
                 if minimize_ele:
@@ -198,10 +225,10 @@ class Dijkstra(SearchAlgorithm):
                 # Outer 'if' trivially satisfied when max is math.inf
                 if alt_path_dist <= max_path_len:
                     if alt_path_weight < weight[n]:
-                        ele_diff[n] = curr_ele_diff
-                        dist[n] = alt_path_dist
+                        self._ele_diff[n] = curr_ele_diff
+                        self._dist[n] = alt_path_dist
                         weight[n] = alt_path_weight
-                        prev[n] = curr_node
+                        self._prev[n] = curr_node
                         priority_queue[n] = weight[n]
 
         return SearchResult()

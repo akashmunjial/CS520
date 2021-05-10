@@ -207,11 +207,11 @@ class MidpointMiracle(SearchAlgorithm):
         dist = ss_result['dist']
 
         if backward:
-            # The ele diff between 'node' (first on the path) and next node
-            # on the path toward the source
+            # 'node' is the start point and so does not contribute to ele_gain
             contributions[node] = 0.
         else:
-            # 'node' is the terminus and so does not contribute to ele_gain
+            # The ele diff between 'node' (first on the path) and next node
+            # on the path toward the source
             contributions[node] = max([0., ele_diff[node]])
         ele_gain += contributions[node]
 

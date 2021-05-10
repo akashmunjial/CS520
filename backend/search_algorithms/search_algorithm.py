@@ -5,8 +5,8 @@ class SearchAlgorithm(ABC):
     """Abstract class that all search algorithms must subclass.
 
     This is the Strategy pattern 'interface' that each of the search algorithm
-    'strategies' must implement, allowing has-a relationship between PathFinder
-    and SearchAlgorithm instead of concrete search algorithms.
+    strategies must implement, allowing PathFinder to have a 'has-a' relationship
+    to SearchAlgorithm instead of to concrete search algorithms.
     """
 
     @abstractmethod

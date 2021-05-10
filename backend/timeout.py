@@ -1,17 +1,24 @@
+"""An implementation of the decorator design pattern for enforcing timeout.
+
+    Typical usage example:
+
+    @timeout(10)
+    def function_that_will_return_none_after_ten_seconds():
+        ...
+"""
 from functools import wraps
 from time import sleep
 from kthread import KThread
 
-def timeout(seconds):
-    """A decorator which forces the function it's decorating to return None after a specified number of seconds
 
-    Usage:
-        @timeout(10)
-        def function_that_will_return_none_after_ten_seconds():
-            ...
+def timeout(seconds):
+    """A decorator which enforces a timeout on the deocrated function.
+
+    Forces the function it decorates to return None after a specified number
+    of seconds.
 
     Args:
-        seconds: The number of seconds after which the function should return None
+        seconds: The number of seconds after which the function should return None.
     """
     def decorator(func):
         @wraps(func)

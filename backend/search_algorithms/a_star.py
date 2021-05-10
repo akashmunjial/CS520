@@ -12,7 +12,8 @@ class AStar(SearchAlgorithm):
     """Class to perform the complete A* search
 
     Attributes:
-        graph_provider: The instance of the graph_provider used for fetching points and other information
+        graph_provider: The instance of the graph_provider used for fetching
+            points and other information.
     """
 
     def __init__(self, graph_provider):
@@ -22,8 +23,8 @@ class AStar(SearchAlgorithm):
         """Calculate the elevation heuristic between the two given nodes.
 
         Args:
-            node1: node id of the source node
-            node2: node id of the target node
+            node1: Node id of the source node.
+            node2: Node id of the target node.
 
         Returns:
             A value representing the heuristic for the elevation model between node1 and node2
@@ -37,11 +38,11 @@ class AStar(SearchAlgorithm):
         """Calculate the elevation gain between the two given nodes.
 
         Args:
-            node1: node id of the source node
-            node2: node id of the target node
+            node1: Node id of the source node.
+            node2: Node id of the target node.
 
         Returns:
-            A value representing the elevation gain from node1 to node2
+            A value representing the elevation gain from node1 to node2.
         """
         n1 = self.graph_provider.get_coords(node1)
         n2 = self.graph_provider.get_coords(node2)
@@ -51,11 +52,11 @@ class AStar(SearchAlgorithm):
         """Calculate the distance heuristic between the two given nodes.
 
         Args:
-            node1: node id of the source node
-            node2: node id of the target node
+            node1: Node id of the source node.
+            node2: Node id of the target node.
 
         Returns:
-            A value representing the euclidean distance between node1 and node2
+            A value representing the euclidean distance between node1 and node2.
         """
         n1 = self.graph_provider.get_coords(node1)
         n2 = self.graph_provider.get_coords(node2)
