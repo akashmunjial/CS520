@@ -3,7 +3,6 @@ import osmnx
 
 """
 The tests in this file will use a real world example.
-Specifically, 
 Note that this could possibly fail due to OpenStreetMap changes.
 That's intended, as bounded_graph_provider is an interface between us and OSM.
 If OSM changes, so must bounded_graph_provider.
