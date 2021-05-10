@@ -16,13 +16,13 @@ def test_check_nodes_exist():
 def test_get_all_nodes():
     example_graph = build_example_graph()
     nodes = list(example_graph.get_all_nodes())
-    assert nodes == [121144800, 121144803, 121144805, 121144808, 121144810, 121144813, 121144821, 121144823, 121144825]
+    assert len(nodes) == 35
 
 # Test a node's known neighbors (none outside of box, as loading would)
 def test_get_neighbors():
     example_graph = build_example_graph()
     neighbors = list(example_graph.get_neighbors(121144825))
-    assert neighbors == [121144823]
+    assert neighbors == [121144827, 121144823]
 
 # Check distance between two nodes
 def test_get_edge_distance_and_estimate():
@@ -43,7 +43,6 @@ def test_get_coords():
 def test_lazy_loading():
     example_graph = build_example_graph()
     nodes_loaded_before = len(example_graph.get_all_nodes())
-    for node in list(example_graph.get_all_nodes()):
-        example_graph.get_neighbors(node)
+    example_graph.get_neighbors(121130123)
     nodes_loaded_after = len(example_graph.get_all_nodes())
     assert nodes_loaded_after > nodes_loaded_before
