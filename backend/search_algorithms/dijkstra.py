@@ -65,8 +65,9 @@ class Dijkstra(SearchAlgorithm):
 
         Returns:
             A dict containing three mappings fully describing the results
-            of the search in terms of backpointers, distances, and elevation
-            differences.
+            of the search in terms of backpointers ('prev'), distances ('dist'),
+            and elevation differences ('ele_diff'). The keys to these mappings
+            are node ids.
         """
         # A mapping from nodes to backpointers for reconstructing paths
         self._prev = defaultdict(lambda: None)
