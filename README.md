@@ -47,4 +47,7 @@ To run the tests using pytest, run the following command from the top-level dire
 ```
 pytest
 ```
-This will run all the tests in the test folder and produce the results.
+This will run all the tests in the test folder and produce the results. If your machine complains that it cannot find the pytest command, try this command instead:
+```
+python3 -m pytest
+```
