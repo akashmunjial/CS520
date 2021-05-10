@@ -30,7 +30,7 @@ python3 app.py --prod
 
 ----
 
-Note: This project requires the addition of a ```keys.py``` file in the ```backend/``` directory containing the line ```api_key='<your key here>'```
+Note: This project requires the addition of a ```keys.py``` file in the ```backend/``` directory containing the line ```api_key='<your key here>'``` for a Google Elevation API Key
 
 ## Documentation
 
