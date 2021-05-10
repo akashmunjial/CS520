@@ -2,7 +2,11 @@ from abc import ABC, abstractmethod
 
 
 class GraphProvider(ABC):
-    """Abstract class declaring the required methods for all implementing subclasses.
+    """Abstract class that all graph providers must subclass.
+
+    This is the Strategy pattern 'interface' that each of the graph provider
+    strategies must implement, allowing PathFinder to have a 'has-a' relationship
+    to GraphProvider instead of to concrete graph provider classes.
     """
 
     @abstractmethod
@@ -21,7 +25,7 @@ class GraphProvider(ABC):
     def get_edge_distance(self, node1, node2):
         """Get the distance between two specified nodes.
 
-        If two nodes have multiple connecting edges, this 
+        If two nodes have multiple connecting edges, this
         method should default to the shortest one availible.
 
         Args:
@@ -37,9 +41,9 @@ class GraphProvider(ABC):
     def get_coords(self, node):
         """Get the latitude and longitude of a node.
 
-        This method is necessary to translate nodes to coordinates 
-        for the frontend to ultimately paint on the user interface. 
-        The frontend leaflet.js module does not use recognize the 
+        This method is necessary to translate nodes to coordinates
+        for the frontend to ultimately paint on the user interface.
+        The frontend leaflet.js module does not use recognize the
         same node ids as osmnx.
 
         Args:
