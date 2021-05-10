@@ -77,6 +77,9 @@ class Dijkstra(SearchAlgorithm):
         visited = set()
         priority_queue = heapdict()
 
+        # Disable lazy loading to prevent infinite chunks from being loaded
+        self.graph_provider.lazy_loading_enabled = False
+
         prev[start] = None
         dist[start] = 0.
         ele_diff[start] = 0.
@@ -96,6 +99,10 @@ class Dijkstra(SearchAlgorithm):
                     dist[n] = alt_path_dist
                     prev[n] = curr_node
                     priority_queue[n] = dist[n]
+
+        # Reenable lazy loading
+        # This does nothing if the graph provider does not support lazy loading
+        self.graph_provider.lazy_loading_enabled = True
 
         result = {
             'prev': prev,
