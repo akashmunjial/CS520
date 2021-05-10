@@ -57,9 +57,12 @@ class PathRequest:
         if not isinstance(distance_percent, str):
             raise ValueError("'distance_percent' must be a string")
         try:
-            self._distance_percent = int(distance_percent)
+            distance_percent = int(distance_percent)
         except ValueError:
             raise ValueError("'distance_percent' must be interpretable as an int") from None
+        if distance_percent < 100.:
+            raise ValueError("'distance percent' must be no less than 100")
+        self._distance_percent = distance_percent
 
     @property
     def ele_setting(self):
