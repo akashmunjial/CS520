@@ -12,13 +12,18 @@ from kthread import KThread
 
 
 def timeout(seconds):
-    """A decorator which enforces a timeout on the deocrated function.
+    """A decorator which enforces a timeout on the decorated function.
 
     Forces the function it decorates to return None after a specified number
     of seconds.
 
     Args:
         seconds: The number of seconds after which the function should return None.
+
+    Returns:
+        The decorator. When the decorated function is executed, the return value
+        will either be the return value of that function if completed
+        successfully within the time alotted, or else None.
     """
     def decorator(func):
         @wraps(func)

@@ -43,7 +43,7 @@ class BoundedGraphProvider(GraphProvider):
     def get_distance_estimate(self, n1, n2):
         """Estimate the distance between any two nodes, no edge necessary.
 
-        This is useful as a heuristic. Using simple trigonometry, it 
+        This is useful as a heuristic. Using simple trigonometry, it
         calculates the distance as the crow flies.
 
         Args:
