@@ -28,6 +28,10 @@ To run for production, use the following command instead:
 python3 app.py --prod
 ```
 
+----
+
+Note: This project requires the addition of a ```keys.py``` file in the ```backend/``` directory containing the line ```api_key='<your key here>'```
+
 ## Documentation
 
 To compile the documentation using Sphinx, run the following command from the top-level directory:
