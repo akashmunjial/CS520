@@ -1,14 +1,11 @@
+"""Unit tests for MidpointMiracle using mock data.
+"""
 from play_graph_provider import PlayProvider
-from backend.graph_providers.bounded_graph_provider import BoundedGraphProvider
-from backend.search_algorithms.a_star import AStar
 from backend.search_algorithms.midpoint_miracle import MidpointMiracle
 
+
 def build_downhill_best_graph_provider():
-    """ For testing min elevation gain algorithm. The point is that
-    chokepoints can cause problems for an algorithm which greedily
-    tries to minimize elevation gain and can only "visit" a node exactly
-    once.
-    """
+    # See test_goes_downhill to understand the logic of this mock
     nodes = [1,2,3,4]
 
     neighbors = {}
@@ -39,6 +36,7 @@ def build_downhill_best_graph_provider():
 
 
 def build_pruning_best_graph_provider():
+    # See test_pruning to understand the logic of this mock
     nodes = [1,2,3,4,5,6]
 
     neighbors = {}
@@ -74,7 +72,24 @@ def build_pruning_best_graph_provider():
     return graph_provider
 
 
+def test_path_limit():
+    # Want to make sure our algorithm respects the path length limit,
+    # also incidentally tests that we can find a path of form [start, end]
+    graph_provider = build_downhill_best_graph_provider()
+
+    shortest_path_len = 10
+
+    mm = MidpointMiracle(graph_provider)
+    res = mm.search(1, 4, 1. * shortest_path_len)
+
+    assert res.path == [1,4]
+    assert res.path_len == 10.
+    assert res.ele_gain == 0.
+
+
 def test_goes_downhill():
+    # A strength of our algorithm is that it will go downhill
+    # if it can sees it can achieve a better overall elevation gain
     graph_provider = build_downhill_best_graph_provider()
 
     shortest_path_len = 10
@@ -83,99 +98,26 @@ def test_goes_downhill():
     res = mm.search(1, 4, 1.1 * shortest_path_len)
 
     assert res.path == [1,2,4]
-    assert res.ele_gain == 20.
     assert res.path_len == 11.
+    assert res.ele_gain == 20.
 
 
 def test_pruning():
+    # A core technique for picking high-quality midpoints in our algorithm
+    # is to prune away their neighbors as we pick them: we test that here
     graph_provider = build_pruning_best_graph_provider()
     mm = MidpointMiracle(graph_provider)
 
     shortest_path_len = 2
 
-    # Point is, it should take a less good path
+    # Without pruning, we will take a decent but not best path
     res_no_prune = mm.search(1, 6, 1.5 * shortest_path_len, keep_n=2, prune_depth=0)
     assert res_no_prune.path == [1,2,6]
     assert res_no_prune.ele_gain == 10.
     assert res_no_prune.path_len == 2.
 
+    # With pruning, we will find a better path
     res_prune = mm.search(1, 6, 1.5 * shortest_path_len, keep_n=2, prune_depth=1)
     assert res_prune.path == [1,3,5,6]
     assert res_prune.ele_gain == 13.
     assert res_prune.path_len == 3.
-
-# Path found with maximum elevation gain within max_path_len
-def test_midpoint_miracle_real_world_1():
-    start_coords = (42.387229, -72.526106)
-    end_coords = (42.372044, -72.516836)
-    distance_percent = 200
-
-    graph_provider = BoundedGraphProvider(start_coords, end_coords)
-
-    astar = AStar(graph_provider)
-    shortest_res = astar.search(graph_provider.start, graph_provider.end)
-
-    max_path_len = shortest_res.path_len * distance_percent / 100
-    mm = MidpointMiracle(graph_provider)
-    alt_res = mm.search(graph_provider.start, graph_provider.end, max_path_len)
-
-    assert alt_res.path_len < max_path_len
-    assert alt_res.path_len >= round(shortest_res.path_len, 3)
-    assert alt_res.ele_gain > round(shortest_res.ele_gain, 3)
-
-# Path found with maximum elevation gain within max_path_len
-def test_midpoint_miracle_real_world_2():
-    start_coords = (42.3506, -71.168575)
-    end_coords = (42.354778, -71.162766)
-    distance_percent = 200
-
-    graph_provider = BoundedGraphProvider(start_coords, end_coords)
-
-    astar = AStar(graph_provider)
-    shortest_res = astar.search(graph_provider.start, graph_provider.end)
-
-    max_path_len = shortest_res.path_len * distance_percent / 100
-    mm = MidpointMiracle(graph_provider)
-    alt_res = mm.search(graph_provider.start, graph_provider.end, max_path_len)
-
-    assert alt_res.path_len < max_path_len
-    assert alt_res.path_len >= round(shortest_res.path_len, 3)
-    assert alt_res.ele_gain > round(shortest_res.ele_gain, 3)
-
-# No path found with maximum elevation gain within max_path_len
-def test_midpoint_miracle_real_world_3():
-    start_coords = (42.472358, -71.120054)
-    end_coords = (42.470771, -71.117066) 
-    distance_percent = 300
-
-    graph_provider = BoundedGraphProvider(start_coords, end_coords)
-
-    astar = AStar(graph_provider)
-    shortest_res = astar.search(graph_provider.start, graph_provider.end)
-
-    max_path_len = shortest_res.path_len * distance_percent / 100
-    mm = MidpointMiracle(graph_provider)
-    alt_res = mm.search(graph_provider.start, graph_provider.end, max_path_len)
-
-    assert alt_res.path_len < max_path_len
-    assert alt_res.path_len >= round(shortest_res.path_len, 3)
-    assert not alt_res.ele_gain > round(shortest_res.ele_gain, 3)
-
-# No path found with maximum elevation gain within max_path_len
-def test_midpoint_miracle_real_world_4():
-    start_coords = (42.47326, -71.106445)
-    end_coords = (42.464531, -71.09504)
-    distance_percent = 300
-
-    graph_provider = BoundedGraphProvider(start_coords, end_coords)
-
-    astar = AStar(graph_provider)
-    shortest_res = astar.search(graph_provider.start, graph_provider.end)
-
-    max_path_len = shortest_res.path_len * distance_percent / 100
-    mm = MidpointMiracle(graph_provider)
-    alt_res = mm.search(graph_provider.start, graph_provider.end, max_path_len)
-
-    assert alt_res.path_len < max_path_len
-    assert alt_res.path_len >= round(shortest_res.path_len, 3)
-    assert not alt_res.ele_gain > round(shortest_res.ele_gain, 3)

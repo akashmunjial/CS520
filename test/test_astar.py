@@ -1,6 +1,7 @@
 """Unit tests for AStar using mock data.
 """
 from backend.search_algorithms.a_star import AStar
+from backend.graph_providers.graph_provider import GraphProvider
 
 
 class PlayProvider(GraphProvider):

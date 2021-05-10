@@ -99,8 +99,8 @@ class MidpointMiracle(SearchAlgorithm):
         dists_to_end = self._single_source_data['end']['dist']
         def filter_func(node):
             # We are only interested in intermediate nodes
-            if node == start or node == end:
-                return False
+            #if node == start or node == end:
+            #    return False
 
             # Filter out nodes for which full path through that node (using
             # paths from single-source step) is longer than maximum allowed
